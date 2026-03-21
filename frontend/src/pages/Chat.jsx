@@ -363,13 +363,31 @@ function Chat() {
             <h2 className="font-bold text-white text-base leading-tight">
               {activeChat.type === "group" ? `# ${activeChat.name}` : activeChat.name}
             </h2>
-            <p className="text-xs text-gray-500 leading-tight">
-              {activeChat.type === "group"
-                ? `${activeGroupInfo?.members ?? 0} members · ${activeGroupInfo?.desc ?? ""}`
-                : activeContactInfo
-                  ? `${STATUS_LABELS[activeContactInfo.status]} · ${activeChat.id}`
-                  : activeChat.id}
-            </p>
+            <div className="flex items-center gap-2 mt-0.5">
+              {activeChat.type === "group" ? (
+                <>
+                  <span className="flex items-center gap-1 text-xs text-gray-500">
+                    <span className="w-1.5 h-1.5 rounded-full bg-green-500 inline-block" />
+                    {activeGroupInfo?.members ?? 0} members
+                  </span>
+                  <span className="text-gray-700 text-xs">·</span>
+                  <span className="text-xs text-gray-600 truncate">{activeGroupInfo?.desc ?? ""}</span>
+                </>
+              ) : activeContactInfo ? (
+                <span className={`inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-full border font-medium ${
+                  activeContactInfo.status === "online"
+                    ? "text-green-400 bg-green-500/10 border-green-500/20"
+                    : activeContactInfo.status === "away"
+                    ? "text-yellow-400 bg-yellow-500/10 border-yellow-500/20"
+                    : "text-gray-500 bg-white/5 border-white/10"
+                }`}>
+                  <span className={`w-1.5 h-1.5 rounded-full ${STATUS_COLORS[activeContactInfo.status]}`} />
+                  {STATUS_LABELS[activeContactInfo.status]}
+                </span>
+              ) : (
+                <span className="text-xs text-gray-600">{activeChat.id}</span>
+              )}
+            </div>
           </div>
 
           {/* Header actions */}
