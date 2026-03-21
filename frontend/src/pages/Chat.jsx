@@ -479,10 +479,10 @@ function Chat() {
                           </div>
                         )}
                         <div
-                          className={`px-4 py-2.5 rounded-2xl text-sm leading-relaxed break-words whitespace-pre-wrap shadow-sm ${`
+                          className={`px-4 py-2.5 rounded-2xl text-sm leading-relaxed break-words whitespace-pre-wrap shadow-sm ${
                             isMe
-                              ? "bg-linear-to-br from-blue-600 to-blue-700 text-white rounded-tr-md"
-                              : "bg-[#1a2030] text-gray-100 border border-white/5 rounded-tl-md"
+                              ? "bg-gradient-to-br from-blue-600 to-blue-700 text-white rounded-tr-sm"
+                              : "bg-[#1a2030] text-gray-100 border border-white/5 rounded-tl-sm"
                           }`}
                         >
                           {msg.content}
