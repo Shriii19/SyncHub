@@ -138,19 +138,21 @@ function Login() {
       </div>
 
       {/* ── Right Form Panel ── */}
-      <div className="flex flex-col justify-center items-center w-full lg:w-auto lg:min-w-120 px-6 py-12 bg-[#13181f] border-l border-white/5">
+      <div className="flex flex-col justify-center items-center w-full lg:w-auto lg:min-w-120 px-6 py-12 bg-[#13181f] border-l border-white/5 relative overflow-hidden">
+        {/* subtle radial glow behind form */}
+        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_60%_40%_at_50%_60%,rgba(59,130,246,0.06),transparent)]" />
         {/* Mobile logo */}
         <div className="lg:hidden flex items-center gap-2.5 mb-8">
           <div className="w-8 h-8 rounded-lg bg-linear-to-br from-blue-500 to-cyan-400 flex items-center justify-center font-black text-sm">S</div>
           <span className="text-xl font-bold text-white">SyncHub</span>
         </div>
 
-        <div className="w-full max-w-sm">
+        <div className="w-full max-w-sm relative">
           <div className="mb-8">
-            <h2 className="text-2xl font-bold text-white mb-1">
+            <h2 className="text-[1.6rem] font-extrabold text-white mb-1 tracking-tight">
               {isSignUp ? "Create an account" : "Welcome back"}
             </h2>
-            <p className="text-gray-500 text-sm">
+            <p className="text-gray-500 text-sm leading-relaxed">
               {isSignUp ? "Start collaborating with your team today." : "Sign in to continue to SyncHub."}
             </p>
           </div>
@@ -248,7 +250,7 @@ function Login() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-3 mt-2 rounded-xl bg-blue-600 hover:bg-blue-500 active:bg-blue-700 text-white font-semibold text-sm transition-all duration-200 shadow-lg shadow-blue-600/20 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              className="w-full py-3 mt-2 rounded-xl bg-gradient-to-r from-blue-600 to-cyan-500 hover:from-blue-500 hover:to-cyan-400 active:from-blue-700 active:to-cyan-600 text-white font-semibold text-sm transition-all duration-200 shadow-lg shadow-blue-600/25 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
             >
               {loading ? (
                 <>
