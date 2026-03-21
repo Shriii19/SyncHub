@@ -522,9 +522,9 @@ function Chat() {
         </main>
 
         {/* Input Bar */}
-        <footer className="px-5 py-4 bg-[#13181f]/70 backdrop-blur-sm border-t border-white/5 shrink-0">
-          <div className="flex items-end gap-2 bg-[#1a2030] rounded-2xl border border-white/8 px-4 py-3 focus-within:border-blue-500/40 focus-within:ring-1 focus-within:ring-blue-500/10 transition-all">
-            <button className="p-1.5 text-gray-600 hover:text-gray-400 transition-colors shrink-0" title="Attach file">
+        <footer className="px-5 py-3 bg-[#13181f]/70 backdrop-blur-sm border-t border-white/5 shrink-0">
+          <div className="flex items-end gap-2 bg-[#1a2030] rounded-2xl border border-white/8 px-3 py-2.5 focus-within:border-blue-500/50 focus-within:ring-2 focus-within:ring-blue-500/10 transition-all duration-200">
+            <button className="p-1.5 text-gray-600 hover:text-blue-400 hover:bg-blue-500/10 rounded-lg transition-colors shrink-0" title="Attach file">
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13" />
               </svg>
@@ -539,7 +539,7 @@ function Chat() {
               rows="1"
               style={{ maxHeight: "120px", minHeight: "22px" }}
             />
-            <button className="p-1.5 text-gray-600 hover:text-gray-400 transition-colors shrink-0" title="Emoji">
+            <button className="p-1.5 text-gray-600 hover:text-yellow-400 hover:bg-yellow-500/10 rounded-lg transition-colors shrink-0" title="Emoji">
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
@@ -547,22 +547,34 @@ function Chat() {
             <button
               onClick={sendMessage}
               disabled={!message.trim()}
-              className={`p-2 rounded-xl transition-all shrink-0 ${
+              className={`p-2.5 rounded-xl transition-all duration-200 shrink-0 ${
                 message.trim()
-                  ? "bg-blue-600 hover:bg-blue-500 text-white shadow-lg shadow-blue-600/20 scale-100"
-                  : "bg-white/5 text-gray-700 cursor-not-allowed"
+                  ? "bg-gradient-to-br from-blue-600 to-blue-500 hover:from-blue-500 hover:to-cyan-500 text-white shadow-lg shadow-blue-600/30 scale-105"
+                  : "bg-white/5 text-gray-700 cursor-not-allowed scale-100"
               }`}
-              title="Send"
+              title="Send (Enter)"
             >
               <svg className="w-4 h-4 rotate-90" fill="currentColor" viewBox="0 0 20 20">
                 <path d="M10.894 2.553a1 1 0 00-1.788 0l-7 14a1 1 0 001.169 1.409l5-1.429A1 1 0 009 15.571V11a1 1 0 112 0v4.571a1 1 0 00.725.962l5 1.428a1 1 0 001.17-1.408l-7-14z" />
               </svg>
             </button>
           </div>
-          <p className="text-center text-xs text-gray-700 mt-2">
-            <kbd className="px-1.5 py-0.5 rounded bg-white/5 font-mono">Enter</kbd> to send ·{" "}
-            <kbd className="px-1.5 py-0.5 rounded bg-white/5 font-mono">Shift+Enter</kbd> for new line
-          </p>
+          <div className="flex items-center justify-between mt-2 px-1">
+            <span className="text-xs text-gray-700">
+              <kbd className="px-1.5 py-0.5 rounded bg-white/5 font-mono border border-white/8">Enter</kbd>
+              {" "}send
+              <span className="mx-1.5 text-gray-800">·</span>
+              <kbd className="px-1.5 py-0.5 rounded bg-white/5 font-mono border border-white/8">Shift+Enter</kbd>
+              {" "}new line
+            </span>
+            {message.length > 0 && (
+              <span className={`text-xs tabular-nums ${
+                message.length > 1800 ? "text-red-400" : message.length > 1500 ? "text-yellow-400" : "text-gray-700"
+              }`}>
+                {message.length}/2000
+              </span>
+            )}
+          </div>
         </footer>
       </div>
     </div>
