@@ -1,121 +1,205 @@
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { io } from "socket.io-client";
 import axios from "axios";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
 const socket = io(API_BASE_URL);
 
-const CONTACTS = [
-  { id: "alice@synchub.io", name: "Alice Johnson", status: "online", unread: 2, lastMsg: "Hey, how's it going?" },
-  { id: "bob@synchub.io", name: "Bob Smith", status: "away", unread: 0, lastMsg: "Let me know when you're free" },
-  { id: "carol@synchub.io", name: "Carol White", status: "offline", unread: 5, lastMsg: "Thanks for the update!" },
-  { id: "dave@synchub.io", name: "Dave Brown", status: "online", unread: 0, lastMsg: "Sounds good to me" },
-  { id: "emma@synchub.io", name: "Emma Davis", status: "online", unread: 1, lastMsg: "Can we sync tomorrow?" },
-];
+const ROOM_MODES = {
+  dm: {
+    title: "1 to 1 Secret Chat",
+    detail: "Private room for two people only.",
+    icon: "M16 7a4 4 0 11-8 0 4 4 0 018 0zm6 13a6 6 0 00-12 0m12 0H10m12 0h-2",
+  },
+  group: {
+    title: "Group Secret Chat",
+    detail: "Invite multiple people with one private link.",
+    icon: "M17 20h5v-2a3 3 0 00-5.36-1.86M17 20H7m10 0v-2a5 5 0 00-9.29-2.86M7 20H2v-2a3 3 0 015.36-1.86M15 7a3 3 0 11-6 0 3 3 0 016 0z",
+  },
+};
 
-const GROUPS = [
-  { id: "general", name: "General", desc: "Team-wide announcements", members: 24, unread: 3 },
-  { id: "dev-team", name: "Dev Team", desc: "Engineering discussions", members: 8, unread: 0 },
-  { id: "design", name: "Design", desc: "UI/UX & product design", members: 5, unread: 1 },
-  { id: "random", name: "Random", desc: "Off-topic fun", members: 18, unread: 0 },
-  { id: "announcements", name: "Announcements", desc: "Important updates", members: 24, unread: 0 },
-];
+function getOrCreateAnonymousId() {
+  const existing = localStorage.getItem("anonymousId");
+  if (existing) return existing;
 
-const AVATAR_GRADIENTS = [
-  "from-violet-500 to-purple-600",
-  "from-blue-500 to-cyan-500",
-  "from-emerald-500 to-green-600",
-  "from-orange-500 to-red-500",
-  "from-pink-500 to-rose-500",
-  "from-teal-500 to-cyan-600",
-  "from-yellow-500 to-orange-500",
-  "from-indigo-500 to-blue-600",
-];
+  const newId = typeof crypto !== "undefined" && crypto.randomUUID
+    ? `anon_${crypto.randomUUID().replace(/-/g, "").slice(0, 14)}`
+    : `anon_${Math.random().toString(36).slice(2, 16)}`;
+  localStorage.setItem("anonymousId", newId);
+  return newId;
+}
 
-const STATUS_COLORS = { online: "bg-green-500", away: "bg-yellow-400", offline: "bg-gray-600" };
-const STATUS_LABELS = { online: "Online", away: "Away", offline: "Offline" };
+function createRoomId(mode) {
+  const randomPart = typeof crypto !== "undefined" && crypto.randomUUID
+    ? crypto.randomUUID().replace(/-/g, "")
+    : Math.random().toString(36).slice(2, 18);
+  return `${mode}_${randomPart.slice(0, 18)}`;
+}
+
+function formatTime(ts) {
+  if (!ts) return "";
+  return new Date(ts).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+}
+
+function buildShareLink(roomId, mode) {
+  if (!roomId || !mode) return "";
+  const url = new URL(window.location.origin + "/chat");
+  url.searchParams.set("room", roomId);
+  url.searchParams.set("mode", mode);
+  return url.toString();
+}
+
+function Icon({ path, className = "h-5 w-5" }) {
+  return (
+    <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d={path} />
+    </svg>
+  );
+}
 
 function Chat() {
+  const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [message, setMessage] = useState("");
   const [messages, setMessages] = useState([]);
-  const [activeChat, setActiveChat] = useState({ type: "group", id: "general", name: "General" });
-  const [sidebarTab, setSidebarTab] = useState("groups");
-  const [searchQuery, setSearchQuery] = useState("");
-  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [roomMode, setRoomMode] = useState(null);
+  const [roomId, setRoomId] = useState("");
+  const [showModePicker, setShowModePicker] = useState(false);
+  const [joinInput, setJoinInput] = useState("");
+  const [error, setError] = useState("");
+  const [loadingHistory, setLoadingHistory] = useState(false);
+  const [copied, setCopied] = useState(false);
+  const [sending, setSending] = useState(false);
+
   const messagesEndRef = useRef(null);
   const textareaRef = useRef(null);
-  const navigate = useNavigate();
-
-  const currentUser = localStorage.getItem("userEmail") || "you@example.com";
-
-  const getRoomId = (chat) => {
-    if (chat.type === "group") return chat.id;
-    return [currentUser, chat.id].sort().join("__dm__");
-  };
-
-  const getInitials = (str) => {
-    if (!str) return "?";
-    const parts = str.split(/[\s@]/);
-    return parts.length > 1
-      ? (parts[0][0] + parts[1][0]).toUpperCase()
-      : str.slice(0, 2).toUpperCase();
-  };
-
-  const getGradient = (seed) => {
-    if (!seed) return AVATAR_GRADIENTS[0];
-    return AVATAR_GRADIENTS[seed.charCodeAt(0) % AVATAR_GRADIENTS.length];
-  };
-
-  const formatTime = (ts) => {
-    if (!ts) return "";
-    return new Date(ts).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
-  };
-
-  const formatDate = (ts) => {
-    if (!ts) return "";
-    const d = new Date(ts);
-    const today = new Date();
-    if (d.toDateString() === today.toDateString()) return "Today";
-    const yesterday = new Date(today);
-    yesterday.setDate(today.getDate() - 1);
-    if (d.toDateString() === yesterday.toDateString()) return "Yesterday";
-    return d.toLocaleDateString([], { month: "short", day: "numeric" });
-  };
+  const anonymousId = useMemo(() => getOrCreateAnonymousId(), []);
+  const shareLink = useMemo(() => buildShareLink(roomId, roomMode), [roomId, roomMode]);
 
   useEffect(() => {
-    setMessages([]);
-    const roomId = getRoomId(activeChat);
-    const token = localStorage.getItem("token");
+    const mode = searchParams.get("mode");
+    const room = searchParams.get("room");
 
-    axios.get(`${API_BASE_URL}/api/messages/${roomId}`, {
-      headers: token ? { Authorization: `Bearer ${token}` } : {},
-    })
-      .then(({ data }) => setMessages(data))
-      .catch(() => {});
+    if ((mode === "dm" || mode === "group") && room) {
+      setRoomMode(mode);
+      setRoomId(room);
+      setShowModePicker(false);
+      setError("");
+    }
+  }, [searchParams]);
+
+  useEffect(() => {
+    if (!roomId || !roomMode) return;
+
+    setLoadingHistory(true);
+    setMessages([]);
+
+    const token = localStorage.getItem("token");
+    axios
+      .get(`${API_BASE_URL}/api/messages/${roomId}`, {
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+      })
+      .then(({ data }) => {
+        if (Array.isArray(data)) setMessages(data);
+      })
+      .catch(() => {
+        setError("Unable to load previous messages for this room.");
+      })
+      .finally(() => setLoadingHistory(false));
 
     socket.emit("joinRoom", roomId);
-    const handler = (data) => setMessages((prev) => [...prev, data]);
-    socket.on("receiveMessage", handler);
+    const receiveHandler = (payload) => {
+      if (payload?.roomId && payload.roomId !== roomId) return;
+      setMessages((prev) => [...prev, payload]);
+    };
+
+    socket.on("receiveMessage", receiveHandler);
     return () => {
-      socket.off("receiveMessage", handler);
+      socket.off("receiveMessage", receiveHandler);
       socket.emit("leaveRoom", roomId);
     };
-  }, [activeChat]);
+  }, [roomId, roomMode]);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    localStorage.removeItem("userEmail");
+    navigate("/");
+  };
+
+  const startChatFlow = () => {
+    setShowModePicker(true);
+    setError("");
+  };
+
+  const createChatRoom = (mode) => {
+    const newRoomId = createRoomId(mode);
+    setSearchParams({ mode, room: newRoomId });
+    setCopied(false);
+  };
+
+  const joinByLinkOrCode = () => {
+    const trimmed = joinInput.trim();
+    if (!trimmed) {
+      setError("Paste a room link or code first.");
+      return;
+    }
+
+    try {
+      if (trimmed.startsWith("http://") || trimmed.startsWith("https://")) {
+        const url = new URL(trimmed);
+        const mode = url.searchParams.get("mode");
+        const room = url.searchParams.get("room");
+
+        if ((mode === "dm" || mode === "group") && room) {
+          setSearchParams({ mode, room });
+          setJoinInput("");
+          setError("");
+          return;
+        }
+      }
+
+      const [maybeMode, maybeRoom] = trimmed.split(":");
+      if ((maybeMode === "dm" || maybeMode === "group") && maybeRoom) {
+        setSearchParams({ mode: maybeMode, room: maybeRoom });
+        setJoinInput("");
+        setError("");
+        return;
+      }
+
+      setError("Invalid link or room code. Use a valid invite URL.");
+    } catch {
+      setError("Invalid link format. Please check and try again.");
+    }
+  };
+
+  const copyShareLink = async () => {
+    if (!shareLink) return;
+    await navigator.clipboard.writeText(shareLink);
+    setCopied(true);
+    window.setTimeout(() => setCopied(false), 1800);
+  };
+
   const sendMessage = () => {
-    if (!message.trim()) return;
+    if (!message.trim() || !roomId || !roomMode || sending) return;
+
+    setSending(true);
     socket.emit("sendMessage", {
-      senderId: currentUser,
-      roomId: getRoomId(activeChat),
-      content: message,
+      senderId: anonymousId,
+      sender: anonymousId,
+      roomId,
+      roomMode,
+      content: message.trim(),
+      createdAt: new Date().toISOString(),
     });
+
     setMessage("");
     if (textareaRef.current) textareaRef.current.style.height = "auto";
+    setSending(false);
   };
 
   const handleKeyDown = (e) => {
@@ -127,455 +211,238 @@ function Chat() {
 
   const handleTextareaChange = (e) => {
     setMessage(e.target.value);
-    const ta = textareaRef.current;
-    if (ta) { ta.style.height = "auto"; ta.style.height = Math.min(ta.scrollHeight, 120) + "px"; }
+    const area = textareaRef.current;
+    if (!area) return;
+    area.style.height = "auto";
+    area.style.height = `${Math.min(area.scrollHeight, 140)}px`;
   };
 
-  const handleLogout = () => {
-    localStorage.removeItem("token");
-    localStorage.removeItem("userEmail");
-    navigate("/");
+  const resetSession = () => {
+    setSearchParams({});
+    setRoomId("");
+    setRoomMode(null);
+    setMessages([]);
+    setMessage("");
+    setCopied(false);
+    setError("");
+    setShowModePicker(true);
   };
 
-  const filteredContacts = CONTACTS.filter(
-    (c) => c.name.toLowerCase().includes(searchQuery.toLowerCase()) || c.id.toLowerCase().includes(searchQuery.toLowerCase())
-  );
-
-  const filteredGroups = GROUPS.filter(
-    (g) => g.name.toLowerCase().includes(searchQuery.toLowerCase())
-  );
-
-  const activeGroupInfo = GROUPS.find((g) => g.id === activeChat.id);
-  const activeContactInfo = CONTACTS.find((c) => c.id === activeChat.id);
-
-  // Group messages by date for dividers
-  const getDateDivider = (index) => {
-    if (index === 0) return formatDate(messages[0]?.createdAt);
-    const prev = new Date(messages[index - 1]?.createdAt);
-    const curr = new Date(messages[index]?.createdAt);
-    if (prev.toDateString() !== curr.toDateString()) return formatDate(messages[index]?.createdAt);
-    return null;
-  };
+  const roomActive = Boolean(roomId && roomMode);
 
   return (
-    <div className="flex h-screen bg-[#0d1117] text-white overflow-hidden font-sans">
-
-      {/* ═══════════ SIDEBAR ═══════════ */}
-      <aside
-        className={`flex flex-col shrink-0 transition-all duration-300 ease-in-out overflow-hidden border-r border-white/5 bg-[#13181f] ${
-          sidebarOpen ? "w-72" : "w-0"
-        }`}
-      >
-        {/* Logo + User Profile */}
-        <div className="px-4 pt-5 pb-4 border-b border-white/5">
-          <div className="flex items-center gap-2.5 mb-5">
-            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-500 to-cyan-400 flex items-center justify-center font-black text-sm shadow-lg shadow-blue-500/30">
+    <div className="min-h-screen bg-(--page-bg) text-white">
+      <div className="mx-auto flex min-h-screen w-full max-w-6xl flex-col px-5 py-6 sm:px-8 lg:px-10">
+        <header className="mb-6 flex items-center justify-between rounded-3xl border border-white/10 bg-white/5 px-5 py-4 backdrop-blur-xl">
+          <div className="flex items-center gap-3">
+            <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-linear-to-br from-cyan-400 to-blue-500 text-lg font-black text-slate-950">
               S
             </div>
-            <span className="font-bold text-white text-base tracking-tight">SyncHub</span>
-            {/* Compose / New Message button */}
-            <button
-              className="ml-auto p-1.5 rounded-lg bg-blue-600/15 hover:bg-blue-600/25 text-blue-400 hover:text-blue-300 border border-blue-500/20 transition-colors"
-              title="New Message"
-            >
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-              </svg>
-            </button>
-          </div>
-          <div className="flex items-center gap-3 p-2.5 rounded-xl bg-white/5 hover:bg-white/8 transition-colors">
-            <div className="relative shrink-0">
-              <div className={`w-9 h-9 rounded-full bg-linear-to-br ${getGradient(currentUser)} flex items-center justify-center text-xs font-bold shadow`}>
-                {getInitials(currentUser)}
-              </div>
-              <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-green-500 rounded-full border-2 border-[#13181f]" />
-            </div>
-            <div className="flex-1 min-w-0">
-              <p className="text-sm font-semibold text-white truncate leading-tight">
-                {currentUser.split("@")[0]}
-              </p>
-              <p className="text-xs text-gray-500 truncate">{currentUser}</p>
-            </div>
-            <button
-              onClick={handleLogout}
-              className="p-1.5 rounded-lg hover:bg-white/10 text-gray-500 hover:text-red-400 transition-colors"
-              title="Logout"
-            >
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-              </svg>
-            </button>
-          </div>
-        </div>
-
-        {/* Search */}
-        <div className="px-4 py-3">
-          <div className="relative">
-            <svg className="w-3.5 h-3.5 text-gray-500 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-            </svg>
-            <input
-              type="text"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search..."
-              className="w-full pl-8 pr-3 py-2 rounded-lg bg-white/5 border border-white/5 text-sm text-white placeholder-gray-600 outline-none focus:ring-1 focus:ring-blue-500/60 focus:border-blue-500/40 transition-all"
-            />
-          </div>
-        </div>
-
-        {/* DM / Groups Tabs */}
-        <div className="px-4 pb-2 flex gap-1 shrink-0">
-          {[
-            { key: "dms", label: "DMs", count: CONTACTS.reduce((s, c) => s + c.unread, 0) },
-            { key: "groups", label: "Channels", count: GROUPS.reduce((s, g) => s + g.unread, 0) },
-          ].map(({ key, label, count }) => (
-            <button
-              key={key}
-              onClick={() => setSidebarTab(key)}
-              className={`flex-1 py-2 text-xs font-semibold rounded-lg transition-all duration-200 flex items-center justify-center gap-1.5 ${
-                sidebarTab === key
-                  ? "bg-blue-500/15 text-blue-400 border border-blue-500/25"
-                  : "text-gray-500 hover:text-gray-300 hover:bg-white/5 border border-transparent"
-              }`}
-            >
-              {label}
-              {count > 0 && (
-                <span className={`min-w-4 h-4 px-1 rounded-full text-[10px] flex items-center justify-center font-bold ${
-                  sidebarTab === key ? "bg-blue-500 text-white" : "bg-white/10 text-gray-400"
-                }`}>
-                  {count}
-                </span>
-              )}
-            </button>
-          ))}
-        </div>
-
-        {/* Contact / Channel List */}
-        <div className="flex-1 overflow-y-auto px-3 pb-4 space-y-0.5 scrollbar-thin">
-          {sidebarTab === "dms" ? (
-            <>
-              <p className="text-xs font-semibold text-gray-600 uppercase tracking-widest px-2 py-2 mt-1">
-                Messages · {filteredContacts.length}
-              </p>
-              {filteredContacts.map((contact) => {
-                const isActive = activeChat.type === "dm" && activeChat.id === contact.id;
-                return (
-                  <button
-                    key={contact.id}
-                    onClick={() => setActiveChat({ type: "dm", id: contact.id, name: contact.name })}
-                    className={`w-full flex items-center gap-3 px-2.5 py-2.5 rounded-xl transition-all group text-left ${
-                      isActive ? "bg-blue-500/15 border border-blue-500/20" : "hover:bg-white/5 border border-transparent"
-                    }`}
-                  >
-                    <div className="relative shrink-0">
-                      <div className={`w-9 h-9 rounded-full bg-linear-to-br ${getGradient(contact.id)} flex items-center justify-center text-xs font-bold shadow`}>
-                        {getInitials(contact.name)}
-                      </div>
-                      <div className={`absolute -bottom-0.5 -right-0.5 w-3 h-3 ${STATUS_COLORS[contact.status]} rounded-full border-2 border-[#13181f]`} />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center justify-between gap-1">
-                        <p className={`text-sm font-medium truncate ${isActive ? "text-white" : "text-gray-300 group-hover:text-white"}`}>
-                          {contact.name}
-                        </p>
-                        {contact.unread > 0 && (
-                          <span className="shrink-0 min-w-5 h-5 px-1.5 bg-blue-500 rounded-full text-xs flex items-center justify-center font-bold">
-                            {contact.unread}
-                          </span>
-                        )}
-                      </div>
-                      <p className="text-xs text-gray-600 truncate">{contact.lastMsg}</p>
-                    </div>
-                  </button>
-                );
-              })}
-            </>
-          ) : (
-            <>
-              <p className="text-xs font-semibold text-gray-600 uppercase tracking-widest px-2 py-2 mt-1">
-                Channels · {filteredGroups.length}
-              </p>
-              {filteredGroups.map((group) => {
-                const isActive = activeChat.type === "group" && activeChat.id === group.id;
-                return (
-                  <button
-                    key={group.id}
-                    onClick={() => setActiveChat({ type: "group", id: group.id, name: group.name })}
-                    className={`w-full flex items-center gap-3 px-2.5 py-2.5 rounded-xl transition-all group text-left ${
-                      isActive ? "bg-blue-500/15 border border-blue-500/20" : "hover:bg-white/5 border border-transparent"
-                    }`}
-                  >
-                    <div className={`w-9 h-9 rounded-xl bg-linear-to-br ${getGradient(group.id)} flex items-center justify-center shrink-0 shadow`}>
-                      <span className="text-sm font-black">#</span>
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center justify-between gap-1">
-                        <p className={`text-sm font-medium truncate ${isActive ? "text-white" : "text-gray-300 group-hover:text-white"}`}>
-                          {group.name}
-                        </p>
-                        {group.unread > 0 && (
-                          <span className="shrink-0 min-w-5 h-5 px-1.5 bg-blue-500 rounded-full text-xs flex items-center justify-center font-bold">
-                            {group.unread}
-                          </span>
-                        )}
-                      </div>
-                      <p className="text-xs text-gray-600 truncate">{group.members} members · {group.desc}</p>
-                    </div>
-                  </button>
-                );
-              })}
-            </>
-          )}
-        </div>
-      </aside>
-
-      {/* ═══════════ MAIN CHAT ═══════════ */}
-      <div className="flex-1 flex flex-col min-w-0">
-
-        {/* Chat Header */}
-        <header className="flex items-center gap-3 px-5 py-3.5 bg-[#13181f]/90 backdrop-blur-md border-b border-white/5 shrink-0 z-10">
-          {/* Sidebar toggle */}
-          <button
-            onClick={() => setSidebarOpen(!sidebarOpen)}
-            className="p-2 rounded-lg hover:bg-white/8 text-gray-500 hover:text-white transition-colors shrink-0"
-          >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-            </svg>
-          </button>
-
-          {/* Chat identity */}
-          {activeChat.type === "group" ? (
-            <div className={`w-10 h-10 rounded-xl bg-linear-to-br ${getGradient(activeChat.id)} flex items-center justify-center font-black text-base shadow shrink-0`}>
-              #
-            </div>
-          ) : (
-            <div className="relative shrink-0">
-              <div className={`w-10 h-10 rounded-full bg-linear-to-br ${getGradient(activeChat.id)} flex items-center justify-center text-sm font-bold shadow`}>
-                {getInitials(activeChat.name)}
-              </div>
-              <div className={`absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 ${activeContactInfo ? STATUS_COLORS[activeContactInfo.status] : "bg-gray-600"} rounded-full border-2 border-[#13181f]`} />
-            </div>
-          )}
-
-          <div className="flex-1 min-w-0">
-            <h2 className="font-bold text-white text-base leading-tight">
-              {activeChat.type === "group" ? `# ${activeChat.name}` : activeChat.name}
-            </h2>
-            <div className="flex items-center gap-2 mt-0.5">
-              {activeChat.type === "group" ? (
-                <>
-                  <span className="flex items-center gap-1 text-xs text-gray-500">
-                    <span className="w-1.5 h-1.5 rounded-full bg-green-500 inline-block" />
-                    {activeGroupInfo?.members ?? 0} members
-                  </span>
-                  <span className="text-gray-700 text-xs">·</span>
-                  <span className="text-xs text-gray-600 truncate">{activeGroupInfo?.desc ?? ""}</span>
-                </>
-              ) : activeContactInfo ? (
-                <span className={`inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-full border font-medium ${
-                  activeContactInfo.status === "online"
-                    ? "text-green-400 bg-green-500/10 border-green-500/20"
-                    : activeContactInfo.status === "away"
-                    ? "text-yellow-400 bg-yellow-500/10 border-yellow-500/20"
-                    : "text-gray-500 bg-white/5 border-white/10"
-                }`}>
-                  <span className={`w-1.5 h-1.5 rounded-full ${STATUS_COLORS[activeContactInfo.status]}`} />
-                  {STATUS_LABELS[activeContactInfo.status]}
-                </span>
-              ) : (
-                <span className="text-xs text-gray-600">{activeChat.id}</span>
-              )}
+            <div>
+              <p className="text-lg font-semibold tracking-tight">SyncHub Secret Chat</p>
+              <p className="text-sm text-slate-400">Anonymous rooms by invite link only.</p>
             </div>
           </div>
 
-          {/* Header actions */}
-          <div className="flex items-center gap-1 shrink-0">
-            {activeChat.type === "dm" && (
-              <>
-                <button className="p-2 rounded-lg hover:bg-white/8 text-gray-500 hover:text-white transition-colors" title="Voice call">
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
-                  </svg>
-                </button>
-                <button className="p-2 rounded-lg hover:bg-white/8 text-gray-500 hover:text-white transition-colors" title="Video call">
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 10l4.553-2.069A1 1 0 0121 8.82v6.36a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
-                  </svg>
-                </button>
-              </>
-            )}
-            {activeChat.type === "group" && (
-              <button className="p-2 rounded-lg hover:bg-white/8 text-gray-500 hover:text-white transition-colors" title="Members">
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
-                </svg>
+          <div className="flex items-center gap-2">
+            {roomActive && (
+              <button
+                onClick={resetSession}
+                className="rounded-xl border border-white/12 bg-white/6 px-4 py-2 text-sm font-medium text-slate-200 transition hover:bg-white/12"
+              >
+                New chat
               </button>
             )}
-            <button className="p-2 rounded-lg hover:bg-white/8 text-gray-500 hover:text-white transition-colors" title="Search">
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-              </svg>
-            </button>
-            <button className="p-2 rounded-lg hover:bg-white/8 text-gray-500 hover:text-white transition-colors" title="More">
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 12h.01M12 12h.01M19 12h.01" />
-              </svg>
+            <button
+              onClick={handleLogout}
+              className="rounded-xl border border-rose-300/20 bg-rose-300/10 px-4 py-2 text-sm font-medium text-rose-200 transition hover:bg-rose-300/16"
+            >
+              Logout
             </button>
           </div>
         </header>
 
-        {/* Messages */}
-        <main className="flex-1 overflow-y-auto px-6 py-4 scrollbar-thin">
-          {messages.length === 0 ? (
-            <div className="h-full flex flex-col items-center justify-center text-center select-none gap-4">
-              <div className={`w-20 h-20 rounded-2xl bg-linear-to-br ${getGradient(activeChat.id)} flex items-center justify-center shadow-2xl`}>
-                {activeChat.type === "group" ? (
-                  <span className="text-3xl font-black">#</span>
-                ) : (
-                  <span className="text-2xl font-bold">{getInitials(activeChat.name)}</span>
-                )}
+        {!roomActive && (
+          <section className="grid gap-5 lg:grid-cols-[1.2fr_0.8fr]">
+            <div className="rounded-[30px] border border-white/10 bg-white/6 p-6 backdrop-blur-xl sm:p-8">
+              <p className="mb-3 inline-flex items-center gap-2 rounded-full border border-cyan-300/20 bg-cyan-300/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.22em] text-cyan-200">
+                Private by design
+              </p>
+              <h1 className="text-3xl font-semibold leading-tight tracking-tight sm:text-4xl">
+                Chat without sharing real names, numbers, or identity details.
+              </h1>
+              <p className="mt-4 max-w-2xl text-sm leading-7 text-slate-300 sm:text-base">
+                Start a secret room, share one link with your friend, and begin chatting anonymously.
+                You choose whether it is 1-to-1 or a private group room.
+              </p>
+
+              <div className="mt-6 grid gap-3 sm:grid-cols-3">
+                {[
+                  "No public user directory",
+                  "Room access by private invite",
+                  "Anonymous sender labels",
+                ].map((item) => (
+                  <div key={item} className="rounded-2xl border border-white/10 bg-slate-950/30 px-4 py-3 text-xs uppercase tracking-[0.14em] text-slate-300">
+                    {item}
+                  </div>
+                ))}
               </div>
-              <div>
-                <h3 className="text-xl font-bold text-white mb-1">
-                  {activeChat.type === "group" ? `Welcome to #${activeChat.name}` : `Chat with ${activeChat.name}`}
-                </h3>
-                <p className="text-sm text-gray-500 max-w-xs">
-                  {activeChat.type === "group"
-                    ? "This is the start of the channel. Be the first to send a message!"
-                    : "This is the beginning of your direct message history. Say hello!"}
+
+              <button
+                onClick={startChatFlow}
+                className="mt-8 inline-flex items-center gap-2 rounded-2xl bg-linear-to-r from-cyan-400 to-blue-600 px-5 py-3 text-sm font-semibold text-slate-950 shadow-[0_18px_45px_rgba(14,165,233,0.35)] transition hover:-translate-y-px"
+              >
+                <Icon path="M12 5v14m7-7H5" className="h-4 w-4" />
+                Start secret chat
+              </button>
+            </div>
+
+            <div className="rounded-[30px] border border-white/10 bg-white/6 p-6 backdrop-blur-xl sm:p-8">
+              <h2 className="text-lg font-semibold">Join existing room</h2>
+              <p className="mt-2 text-sm leading-6 text-slate-400">Paste a full invite link generated by your friend.</p>
+
+              <div className="mt-4 space-y-3">
+                <input
+                  type="text"
+                  placeholder="https://your-app/chat?mode=dm&room=..."
+                  value={joinInput}
+                  onChange={(e) => setJoinInput(e.target.value)}
+                  className="w-full rounded-2xl border border-white/12 bg-slate-950/45 px-4 py-3 text-sm outline-none transition placeholder:text-slate-500 focus:border-cyan-300/40 focus:ring-4 focus:ring-cyan-400/10"
+                />
+                <button
+                  onClick={joinByLinkOrCode}
+                  className="w-full rounded-2xl border border-white/12 bg-white/10 px-4 py-3 text-sm font-semibold transition hover:bg-white/18"
+                >
+                  Join secret room
+                </button>
+              </div>
+
+              {error && (
+                <p className="mt-4 rounded-xl border border-rose-300/25 bg-rose-300/12 px-3 py-2 text-sm text-rose-100">
+                  {error}
                 </p>
-              </div>
-              {activeChat.type === "group" && activeGroupInfo && (
-                <div className="flex items-center gap-2 px-4 py-2 rounded-xl bg-white/5 border border-white/5 text-sm text-gray-400">
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
-                  </svg>
-                  <span>{activeGroupInfo.members} members in this channel</span>
-                </div>
               )}
             </div>
-          ) : (
-            <div className="space-y-0.5">
-              {messages.map((msg, index) => {
-                const sender = msg.sender || "Anonymous";
-                const isMe = sender === currentUser;
-                const prev = messages[index - 1];
-                const isSameUser = (prev?.sender || "Anonymous") === sender;
-                const timeDiff = prev ? (new Date(msg.createdAt) - new Date(prev.createdAt)) / 60000 : 999;
-                const showHeader = !isSameUser || timeDiff > 5;
-                const dateDivider = getDateDivider(index);
+          </section>
+        )}
 
-                return (
-                  <div key={index}>
-                    {dateDivider && (
-                      <div className="flex items-center gap-3 my-6">
-                        <div className="flex-1 h-px bg-white/5" />
-                        <span className="text-xs font-semibold text-gray-600 bg-[#0d1117] px-3 py-1 rounded-full border border-white/5">
-                          {dateDivider}
-                        </span>
-                        <div className="flex-1 h-px bg-white/5" />
-                      </div>
-                    )}
-                    <div className={`flex gap-3 group animate-msg-in ${showHeader ? "mt-5" : "mt-0.5"} ${isMe ? "flex-row-reverse" : "flex-row"}`}>
-                      {/* Avatar */}
-                      <div className={`shrink-0 w-9 mt-0.5 ${showHeader ? "" : "invisible"}`}>
-                        <div className={`w-9 h-9 rounded-full bg-linear-to-br ${getGradient(sender)} flex items-center justify-center text-xs font-bold shadow`}>
-                          {getInitials(sender)}
-                        </div>
-                      </div>
+        {showModePicker && !roomActive && (
+          <section className="mt-5 rounded-[30px] border border-white/10 bg-slate-950/45 p-5 backdrop-blur-xl sm:p-6">
+            <h2 className="text-lg font-semibold">Choose chat type</h2>
+            <p className="mt-1 text-sm text-slate-400">Create a room and get an invite link immediately.</p>
+            <div className="mt-5 grid gap-4 md:grid-cols-2">
+              {Object.entries(ROOM_MODES).map(([key, mode]) => (
+                <button
+                  key={key}
+                  onClick={() => createChatRoom(key)}
+                  className="rounded-3xl border border-white/12 bg-white/6 p-5 text-left transition hover:border-cyan-300/30 hover:bg-white/10"
+                >
+                  <div className="mb-4 flex h-10 w-10 items-center justify-center rounded-xl border border-cyan-300/20 bg-cyan-300/10 text-cyan-100">
+                    <Icon path={mode.icon} className="h-5 w-5" />
+                  </div>
+                  <h3 className="text-base font-semibold">{mode.title}</h3>
+                  <p className="mt-2 text-sm leading-6 text-slate-400">{mode.detail}</p>
+                </button>
+              ))}
+            </div>
+          </section>
+        )}
 
-                      {/* Content */}
-                      <div className={`flex flex-col max-w-[65%] ${isMe ? "items-end" : "items-start"}`}>
-                        {showHeader && (
-                          <div className={`flex items-baseline gap-2 mb-1.5 px-1 ${isMe ? "flex-row-reverse" : ""}`}>
-                            <span className="text-xs font-semibold text-gray-300">
-                              {isMe ? "You" : sender?.split("@")[0] ?? "Anonymous"}
-                            </span>
-                            <span className="text-xs text-gray-600">{formatTime(msg.createdAt)}</span>
-                          </div>
-                        )}
-                        <div
-                          className={`px-4 py-2.5 rounded-2xl text-sm leading-relaxed break-words whitespace-pre-wrap shadow-sm ${
-                            isMe
-                              ? "bg-gradient-to-br from-blue-600 to-blue-700 text-white rounded-tr-sm"
-                              : "bg-[#1a2030] text-gray-100 border border-white/5 rounded-tl-sm"
-                          }`}
-                        >
-                          {msg.content}
-                        </div>
-                        {!showHeader && (
-                          <span className="text-xs text-gray-700 opacity-0 group-hover:opacity-100 transition-opacity px-1 mt-0.5">
-                            {formatTime(msg.createdAt)}
-                          </span>
-                        )}
+        {roomActive && (
+          <section className="grid flex-1 gap-5 lg:grid-cols-[0.95fr_1.05fr]">
+            <aside className="rounded-[30px] border border-white/10 bg-white/6 p-5 backdrop-blur-xl sm:p-6">
+              <p className="inline-flex items-center gap-2 rounded-full border border-emerald-300/20 bg-emerald-300/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-emerald-200">
+                Room Active
+              </p>
+              <h2 className="mt-3 text-2xl font-semibold tracking-tight">{ROOM_MODES[roomMode]?.title}</h2>
+              <p className="mt-2 text-sm leading-6 text-slate-400">Share this private link. Anyone with this link can join this secret room.</p>
+
+              <div className="mt-5 rounded-2xl border border-white/12 bg-slate-950/45 p-3">
+                <p className="mb-2 text-xs uppercase tracking-[0.2em] text-slate-500">Invite link</p>
+                <p className="break-all text-sm text-slate-200">{shareLink}</p>
+                <div className="mt-3 flex gap-2">
+                  <button
+                    onClick={copyShareLink}
+                    className="rounded-xl bg-linear-to-r from-cyan-400 to-blue-600 px-4 py-2 text-sm font-semibold text-slate-950"
+                  >
+                    {copied ? "Copied" : "Copy link"}
+                  </button>
+                  <button
+                    onClick={resetSession}
+                    className="rounded-xl border border-white/12 bg-white/10 px-4 py-2 text-sm font-semibold text-slate-200"
+                  >
+                    End room
+                  </button>
+                </div>
+              </div>
+
+              <div className="mt-5 rounded-2xl border border-white/12 bg-slate-950/35 p-4 text-sm leading-7 text-slate-300">
+                <p>Mode: <span className="font-semibold text-white">{roomMode === "dm" ? "1 to 1" : "Group"}</span></p>
+                <p>Room ID: <span className="font-mono text-xs text-slate-300">{roomId}</span></p>
+                <p>Your ID in this room: <span className="font-mono text-xs text-slate-300">{anonymousId}</span></p>
+              </div>
+            </aside>
+
+            <div className="flex min-h-135 flex-col rounded-[30px] border border-white/10 bg-white/6 backdrop-blur-xl">
+              <div className="border-b border-white/10 px-5 py-4 sm:px-6">
+                <h3 className="text-lg font-semibold">Secret room conversation</h3>
+                <p className="mt-1 text-sm text-slate-400">Participants are displayed as anonymous identities only.</p>
+              </div>
+
+              <main className="scrollbar-thin flex-1 space-y-3 overflow-y-auto px-5 py-4 sm:px-6">
+                {loadingHistory && <p className="text-sm text-slate-500">Loading room history...</p>}
+
+                {!loadingHistory && messages.length === 0 && (
+                  <div className="mt-8 rounded-2xl border border-dashed border-white/16 bg-slate-950/35 p-6 text-center">
+                    <p className="text-sm text-slate-400">This room is empty. Send the first anonymous message.</p>
+                  </div>
+                )}
+
+                {messages.map((msg, index) => {
+                  const senderId = msg.senderId || msg.sender || "anon_guest";
+                  const isMe = senderId === anonymousId;
+                  return (
+                    <div key={`${msg.createdAt || "t"}_${index}`} className={`flex ${isMe ? "justify-end" : "justify-start"}`}>
+                      <div className={`max-w-[80%] rounded-2xl px-4 py-3 text-sm leading-6 ${isMe ? "bg-linear-to-br from-cyan-400 to-blue-600 text-slate-950" : "border border-white/10 bg-slate-950/40 text-slate-100"}`}>
+                        <p className="mb-1 text-xs font-semibold uppercase tracking-[0.14em] opacity-70">
+                          {isMe ? "You" : "Guest"}
+                        </p>
+                        <p className="whitespace-pre-wrap wrap-break-word">{msg.content}</p>
+                        <p className={`mt-1 text-[11px] ${isMe ? "text-slate-800/80" : "text-slate-500"}`}>
+                          {formatTime(msg.createdAt)}
+                        </p>
                       </div>
                     </div>
-                  </div>
-                );
-              })}
+                  );
+                })}
+
+                <div ref={messagesEndRef} />
+              </main>
+
+              <footer className="border-t border-white/10 px-5 py-4 sm:px-6">
+                <div className="flex items-end gap-3 rounded-2xl border border-white/12 bg-slate-950/40 p-3">
+                  <textarea
+                    ref={textareaRef}
+                    value={message}
+                    onChange={handleTextareaChange}
+                    onKeyDown={handleKeyDown}
+                    rows={1}
+                    placeholder="Send anonymous message..."
+                    className="max-h-35 min-h-6 flex-1 resize-none bg-transparent text-sm leading-6 text-white outline-none placeholder:text-slate-500"
+                  />
+                  <button
+                    onClick={sendMessage}
+                    disabled={!message.trim() || sending}
+                    className="rounded-xl bg-linear-to-r from-cyan-400 to-blue-600 px-4 py-2.5 text-sm font-semibold text-slate-950 transition disabled:cursor-not-allowed disabled:opacity-40"
+                  >
+                    Send
+                  </button>
+                </div>
+                {error && <p className="mt-2 text-sm text-rose-300">{error}</p>}
+              </footer>
             </div>
-          )}
-
-          <div ref={messagesEndRef} />
-        </main>
-
-        {/* Input Bar */}
-        <footer className="px-5 py-3 bg-[#13181f]/70 backdrop-blur-sm border-t border-white/5 shrink-0">
-          <div className="flex items-end gap-2 bg-[#1a2030] rounded-2xl border border-white/8 px-3 py-2.5 focus-within:border-blue-500/50 focus-within:ring-2 focus-within:ring-blue-500/10 transition-all duration-200">
-            <button className="p-1.5 text-gray-600 hover:text-blue-400 hover:bg-blue-500/10 rounded-lg transition-colors shrink-0" title="Attach file">
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13" />
-              </svg>
-            </button>
-            <textarea
-              ref={textareaRef}
-              className="flex-1 bg-transparent outline-none text-white placeholder-gray-600 resize-none text-sm leading-relaxed py-0.5"
-              value={message}
-              onChange={handleTextareaChange}
-              onKeyDown={handleKeyDown}
-              placeholder={`Message ${activeChat.type === "group" ? "#" + activeChat.name : activeChat.name}…`}
-              rows="1"
-              style={{ maxHeight: "120px", minHeight: "22px" }}
-            />
-            <button className="p-1.5 text-gray-600 hover:text-yellow-400 hover:bg-yellow-500/10 rounded-lg transition-colors shrink-0" title="Emoji">
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-            </button>
-            <button
-              onClick={sendMessage}
-              disabled={!message.trim()}
-              className={`p-2.5 rounded-xl transition-all duration-200 shrink-0 ${
-                message.trim()
-                  ? "bg-gradient-to-br from-blue-600 to-blue-500 hover:from-blue-500 hover:to-cyan-500 text-white shadow-lg shadow-blue-600/30 scale-105"
-                  : "bg-white/5 text-gray-700 cursor-not-allowed scale-100"
-              }`}
-              title="Send (Enter)"
-            >
-              <svg className="w-4 h-4 rotate-90" fill="currentColor" viewBox="0 0 20 20">
-                <path d="M10.894 2.553a1 1 0 00-1.788 0l-7 14a1 1 0 001.169 1.409l5-1.429A1 1 0 009 15.571V11a1 1 0 112 0v4.571a1 1 0 00.725.962l5 1.428a1 1 0 001.17-1.408l-7-14z" />
-              </svg>
-            </button>
-          </div>
-          <div className="flex items-center justify-between mt-2 px-1">
-            <span className="text-xs text-gray-700">
-              <kbd className="px-1.5 py-0.5 rounded bg-white/5 font-mono border border-white/8">Enter</kbd>
-              {" "}send
-              <span className="mx-1.5 text-gray-800">·</span>
-              <kbd className="px-1.5 py-0.5 rounded bg-white/5 font-mono border border-white/8">Shift+Enter</kbd>
-              {" "}new line
-            </span>
-            {message.length > 0 && (
-              <span className={`text-xs tabular-nums ${
-                message.length > 1800 ? "text-red-400" : message.length > 1500 ? "text-yellow-400" : "text-gray-700"
-              }`}>
-                {message.length}/2000
-              </span>
-            )}
-          </div>
-        </footer>
+          </section>
+        )}
       </div>
     </div>
   );
