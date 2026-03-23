@@ -6,26 +6,26 @@ const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
 
 const highlights = [
   {
-    title: "Focused team messaging",
-    description: "Organize conversations across direct messages, project channels, and decision threads.",
+    title: "Anonymous by default",
+    description: "No public profiles or contact directory. Join only through private invite links.",
   },
   {
-    title: "Fast collaboration flow",
-    description: "Share updates, align priorities, and keep delivery moving without context switching.",
+    title: "Simple room options",
+    description: "Start a 1-to-1 room or group room in one click, then share the generated link.",
   },
   {
-    title: "Built for secure work",
-    description: "Reliable access control and protected communication for distributed teams.",
+    title: "Built for private conversations",
+    description: "Keep chats private while reducing identity exposure in every room.",
   },
 ];
 
 const stats = [
-  { value: "12k+", label: "messages delivered daily" },
-  { value: "94%", label: "weekly team retention" },
-  { value: "38", label: "active product squads" },
+  { value: "12k+", label: "anonymous messages sent" },
+  { value: "2x", label: "room types available" },
+  { value: "1", label: "invite link per room" },
 ];
 
-const trustBadges = ["SOC-aware access", "Real-time channels", "Cross-team updates"];
+const trustBadges = ["No public directory", "Invite-only rooms", "Anonymous sender IDs"];
 
 function Icon({ path, className = "w-5 h-5" }) {
   return (
@@ -101,22 +101,22 @@ function Login() {
               </div>
               <div>
                 <p className="text-lg font-semibold tracking-tight text-white">SyncHub</p>
-                <p className="text-sm text-slate-400">Team communication, made operational.</p>
+                <p className="text-sm text-slate-400">Private conversations with link-based access.</p>
               </div>
             </div>
 
             <div className="max-w-xl">
               <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-cyan-300/20 bg-cyan-300/8 px-3 py-1 text-xs font-semibold uppercase tracking-[0.24em] text-cyan-200">
                 <span className="h-2 w-2 rounded-full bg-cyan-300" />
-                Trusted workspace messaging
+                Invite-only secret chat
               </div>
 
               <h1 className="max-w-2xl text-4xl font-semibold leading-[1.02] tracking-[-0.04em] text-white sm:text-5xl lg:text-6xl">
-                A sharper workspace for teams that need fast decisions and clear communication.
+                A private chat product designed for anonymous 1-to-1 and group rooms.
               </h1>
 
               <p className="mt-6 max-w-xl text-base leading-8 text-slate-300 sm:text-lg">
-                SyncHub brings project channels, direct conversations, and live coordination into one focused environment that feels dependable from the first sign-in.
+                Create a room, share one secure link, and chat without exposing real names or contact details.
               </p>
             </div>
 
@@ -137,19 +137,19 @@ function Login() {
               <div className="rounded-4xl border border-white/10 bg-[linear-gradient(180deg,rgba(15,23,42,0.88),rgba(15,23,42,0.56))] p-5 shadow-[0_35px_90px_rgba(2,6,23,0.35)] backdrop-blur-xl">
                 <div className="flex items-center justify-between border-b border-white/8 pb-4">
                   <div>
-                    <p className="text-sm font-semibold text-white">Launch coordination</p>
-                    <p className="mt-1 text-sm text-slate-400">Cross-functional team channel</p>
+                    <p className="text-sm font-semibold text-white">Private room preview</p>
+                    <p className="mt-1 text-sm text-slate-400">Anonymous messages inside invite-only room</p>
                   </div>
                   <div className="rounded-full border border-emerald-400/25 bg-emerald-400/10 px-3 py-1 text-xs font-medium text-emerald-300">
-                    18 active now
+                    Link active
                   </div>
                 </div>
 
                 <div className="space-y-4 py-5">
                   {[
-                    { name: "Maya", role: "Product", message: "Design QA is complete. Engineering can lock the launch checklist.", accent: "bg-emerald-400" },
-                    { name: "Jon", role: "Engineering", message: "API latency is below target. Shipping the final release candidate now.", accent: "bg-cyan-400" },
-                    { name: "Nia", role: "Ops", message: "Support macros are ready and rollout monitoring starts at 14:00 UTC.", accent: "bg-violet-400" },
+                    { name: "User A", role: "Anonymous", message: "I opened a 1-to-1 room. Sharing the invite link now.", accent: "bg-emerald-400" },
+                    { name: "User B", role: "Anonymous", message: "Joined. No profile names are visible here, which is perfect.", accent: "bg-cyan-400" },
+                    { name: "User C", role: "Anonymous", message: "Group mode also works with the same private-link concept.", accent: "bg-violet-400" },
                   ].map((message) => (
                     <div key={message.name} className="flex gap-3 rounded-2xl border border-white/6 bg-white/5 p-4">
                       <div className={`mt-1 h-2.5 w-2.5 shrink-0 rounded-full ${message.accent}`} />
@@ -202,12 +202,12 @@ function Login() {
           <div className="relative w-full max-w-md animate-fade-up rounded-4xl border border-white/10 bg-[linear-gradient(180deg,rgba(15,23,42,0.88),rgba(15,23,42,0.72))] p-6 shadow-[0_40px_120px_rgba(2,6,23,0.48)] backdrop-blur-2xl sm:p-8">
             <div className="mb-8 flex items-start justify-between gap-4">
               <div>
-                <p className="text-sm font-medium text-cyan-200">{isSignUp ? "Set up your workspace" : "Secure sign in"}</p>
+                <p className="text-sm font-medium text-cyan-200">{isSignUp ? "Create your private access" : "Secure sign in"}</p>
                 <h2 className="mt-2 text-3xl font-semibold tracking-tight text-white">
                   {isSignUp ? "Create your account" : "Welcome back"}
                 </h2>
                 <p className="mt-3 text-sm leading-6 text-slate-400">
-                  {isSignUp ? "Launch team collaboration with a cleaner, more organized workspace." : "Access your team channels, direct messages, and live collaboration history."}
+                  {isSignUp ? "Create your account to start anonymous invite-only rooms." : "Sign in to create private rooms and share secure chat links."}
                 </p>
               </div>
 
