@@ -4,6 +4,37 @@ import { useNavigate } from "react-router-dom";
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
 
+const highlights = [
+  {
+    title: "Focused team messaging",
+    description: "Organize conversations across direct messages, project channels, and decision threads.",
+  },
+  {
+    title: "Fast collaboration flow",
+    description: "Share updates, align priorities, and keep delivery moving without context switching.",
+  },
+  {
+    title: "Built for secure work",
+    description: "Reliable access control and protected communication for distributed teams.",
+  },
+];
+
+const stats = [
+  { value: "12k+", label: "messages delivered daily" },
+  { value: "94%", label: "weekly team retention" },
+  { value: "38", label: "active product squads" },
+];
+
+const trustBadges = ["SOC-aware access", "Real-time channels", "Cross-team updates"];
+
+function Icon({ path, className = "w-5 h-5" }) {
+  return (
+    <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d={path} />
+    </svg>
+  );
+}
+
 function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -54,233 +85,289 @@ function Login() {
   };
 
   const inputClass =
-    "w-full pl-10 pr-4 py-3 rounded-xl bg-[#1a2030] border border-white/8 outline-none text-white placeholder-gray-600 text-sm focus:ring-1 focus:ring-blue-500/60 focus:border-blue-500/40 transition-all duration-200";
-
-  const features = [
-    { icon: "M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z", label: "Real-Time Messaging" },
-    { icon: "M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z", label: "Group Channels" },
-    { icon: "M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z", label: "End-to-End Secure" },
-  ];
+    "w-full rounded-2xl border border-white/10 bg-white/6 px-4 py-3.5 pl-11 pr-11 text-[15px] text-white outline-none transition duration-200 placeholder:text-slate-500 focus:border-cyan-300/50 focus:bg-white/8 focus:ring-4 focus:ring-cyan-400/10";
 
   return (
-    <div className="min-h-screen bg-[#0d1117] flex font-sans">
-      {/* ── Left Branding Panel ── */}
-      <div className="hidden lg:flex flex-col justify-center items-start flex-1 px-16 py-12 relative overflow-hidden bg-linear-to-br from-[#0d1117] via-[#0f1a2e] to-[#0d1117]">
-        {/* Glow blobs */}
-        <div className="absolute top-1/4 left-1/3 w-80 h-80 bg-blue-600 rounded-full blur-3xl opacity-10 animate-blob" />
-        <div className="absolute bottom-1/4 right-1/4 w-80 h-80 bg-cyan-500 rounded-full blur-3xl opacity-10 animate-blob animation-delay-2000" />
+    <div className="relative min-h-screen overflow-hidden bg-(--page-bg) text-white">
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(45,212,191,0.12),transparent_28%),radial-gradient(circle_at_75%_20%,rgba(14,165,233,0.12),transparent_24%),radial-gradient(circle_at_bottom_right,rgba(99,102,241,0.14),transparent_30%)]" />
+      <div className="pointer-events-none absolute inset-0 auth-grid opacity-40" />
 
-        {/* Logo */}
-        <div className="flex items-center gap-3 mb-12">
-          <div className="w-10 h-10 rounded-xl bg-linear-to-br from-blue-500 to-cyan-400 flex items-center justify-center font-black text-lg shadow-lg shadow-blue-500/30">
-            S
-          </div>
-          <span className="text-2xl font-bold text-white tracking-tight">SyncHub</span>
-        </div>
-
-        <h1 className="text-5xl font-black text-white leading-tight mb-4 tracking-tight">
-          Connect with your<br />
-          <span className="text-transparent bg-clip-text bg-linear-to-r from-blue-400 to-cyan-400">
-            team, instantly.
-          </span>
-        </h1>
-        <p className="text-gray-500 text-lg max-w-sm leading-relaxed mb-12">
-          One place for direct messages, group channels, and real-time collaboration.
-        </p>
-
-        <div className="space-y-3">
-          {features.map(({ icon, label }) => (
-            <div key={label} className="flex items-center gap-3 text-gray-400">
-              <div className="w-8 h-8 rounded-lg bg-blue-500/10 border border-blue-500/20 flex items-center justify-center shrink-0">
-                <svg className="w-4 h-4 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={icon} />
-                </svg>
+      <div className="relative mx-auto flex min-h-screen max-w-360 flex-col lg:flex-row">
+        <section className="flex flex-1 items-center px-6 py-10 sm:px-10 lg:px-16 lg:py-14 xl:px-20">
+          <div className="w-full max-w-2xl animate-fade-up">
+            <div className="mb-8 flex items-center gap-3">
+              <div className="flex h-11 w-11 items-center justify-center rounded-2xl border border-white/12 bg-linear-to-br from-cyan-400 to-blue-500 text-lg font-black text-slate-950 shadow-[0_18px_45px_rgba(14,165,233,0.25)]">
+                S
               </div>
-              <span className="text-sm font-medium">{label}</span>
-            </div>
-          ))}
-        </div>
-
-        {/* ── Decorative mock chat card ── */}
-        <div className="mt-12 w-full max-w-xs rounded-2xl bg-[#13181f]/80 border border-white/8 backdrop-blur-sm p-4 shadow-2xl">
-          <div className="flex items-center gap-2 mb-3 pb-3 border-b border-white/5">
-            <div className="w-2 h-2 rounded-full bg-green-500" />
-            <span className="text-xs font-semibold text-gray-400"># general</span>
-            <span className="ml-auto text-xs text-gray-600">24 members</span>
-          </div>
-          <div className="space-y-3">
-            {[
-              { name: "Alex", color: "from-violet-500 to-purple-600", msg: "Just pushed the v2 update 🚀" },
-              { name: "Sara", color: "from-blue-500 to-cyan-500", msg: "Amazing! Looks great on mobile too." },
-              { name: "You", color: "from-blue-600 to-blue-700", msg: "Thanks team, great work! 🙌", isMe: true },
-            ].map(({ name, color, msg, isMe }) => (
-              <div key={name} className={`flex gap-2 ${isMe ? "flex-row-reverse" : ""}`}>
-                <div className={`w-6 h-6 rounded-full bg-gradient-to-br ${color} flex items-center justify-center text-xs font-bold shrink-0 mt-0.5`}>
-                  {name[0]}
-                </div>
-                <div className={`px-3 py-1.5 rounded-xl text-xs leading-snug max-w-[80%] ${isMe ? "bg-blue-600 text-white" : "bg-white/5 text-gray-300 border border-white/5"}`}>
-                  {msg}
-                </div>
-              </div>
-            ))}
-          </div>
-          <div className="mt-3 pt-3 border-t border-white/5 flex items-center gap-2">
-            <div className="flex-1 h-7 rounded-lg bg-white/5 border border-white/5 flex items-center px-2.5">
-              <span className="text-xs text-gray-700">Message #general…</span>
-            </div>
-            <div className="w-7 h-7 rounded-lg bg-blue-600/80 flex items-center justify-center shrink-0">
-              <svg className="w-3 h-3 text-white rotate-90" fill="currentColor" viewBox="0 0 20 20">
-                <path d="M10.894 2.553a1 1 0 00-1.788 0l-7 14a1 1 0 001.169 1.409l5-1.429A1 1 0 009 15.571V11a1 1 0 112 0v4.571a1 1 0 00.725.962l5 1.428a1 1 0 001.17-1.408l-7-14z" />
-              </svg>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* ── Right Form Panel ── */}
-      <div className="flex flex-col justify-center items-center w-full lg:w-auto lg:min-w-120 px-6 py-12 bg-[#13181f] border-l border-white/5 relative overflow-hidden">
-        {/* subtle radial glow behind form */}
-        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_60%_40%_at_50%_60%,rgba(59,130,246,0.06),transparent)]" />
-        {/* Mobile logo */}
-        <div className="lg:hidden flex items-center gap-2.5 mb-8">
-          <div className="w-8 h-8 rounded-lg bg-linear-to-br from-blue-500 to-cyan-400 flex items-center justify-center font-black text-sm">S</div>
-          <span className="text-xl font-bold text-white">SyncHub</span>
-        </div>
-
-        <div className="w-full max-w-sm relative">
-          <div className="mb-8">
-            <h2 className="text-[1.6rem] font-extrabold text-white mb-1 tracking-tight">
-              {isSignUp ? "Create an account" : "Welcome back"}
-            </h2>
-            <p className="text-gray-500 text-sm leading-relaxed">
-              {isSignUp ? "Start collaborating with your team today." : "Sign in to continue to SyncHub."}
-            </p>
-          </div>
-
-          {/* Tabs */}
-          <div className="flex gap-1 p-1 bg-white/5 rounded-xl mb-7 border border-white/5">
-            {[false, true].map((su) => (
-              <button
-                key={String(su)}
-                onClick={() => { setIsSignUp(su); setError(""); }}
-                className={`flex-1 py-2.5 rounded-lg text-sm font-semibold transition-all duration-200 ${
-                  isSignUp === su
-                    ? "bg-blue-600 text-white shadow-lg shadow-blue-600/20"
-                    : "text-gray-500 hover:text-gray-300"
-                }`}
-              >
-                {su ? "Sign Up" : "Sign In"}
-              </button>
-            ))}
-          </div>
-
-          {/* Error */}
-          {error && (
-            <div className="mb-5 flex items-center gap-2.5 p-3.5 rounded-xl bg-red-500/8 border border-red-500/20 animate-shake">
-              <svg className="w-4 h-4 text-red-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" />
-              </svg>
-              <span className="text-sm text-red-400">{error}</span>
-            </div>
-          )}
-
-          <form onSubmit={isSignUp ? handleSignUp : handleLogin} className="space-y-4">
-            {isSignUp && (
               <div>
-                <label className="block text-xs font-semibold text-gray-400 uppercase tracking-widest mb-2">Username</label>
-                <div className="relative">
-                  <svg className="w-4 h-4 text-gray-600 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                  </svg>
-                  <input type="text" placeholder="Enter your username" value={username} onChange={(e) => setUsername(e.target.value)} required={isSignUp} className={inputClass} />
+                <p className="text-lg font-semibold tracking-tight text-white">SyncHub</p>
+                <p className="text-sm text-slate-400">Team communication, made operational.</p>
+              </div>
+            </div>
+
+            <div className="max-w-xl">
+              <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-cyan-300/20 bg-cyan-300/8 px-3 py-1 text-xs font-semibold uppercase tracking-[0.24em] text-cyan-200">
+                <span className="h-2 w-2 rounded-full bg-cyan-300" />
+                Trusted workspace messaging
+              </div>
+
+              <h1 className="max-w-2xl text-4xl font-semibold leading-[1.02] tracking-[-0.04em] text-white sm:text-5xl lg:text-6xl">
+                A sharper workspace for teams that need fast decisions and clear communication.
+              </h1>
+
+              <p className="mt-6 max-w-xl text-base leading-8 text-slate-300 sm:text-lg">
+                SyncHub brings project channels, direct conversations, and live coordination into one focused environment that feels dependable from the first sign-in.
+              </p>
+            </div>
+
+            <div className="mt-10 grid gap-4 sm:grid-cols-3">
+              {stats.map((item, index) => (
+                <div
+                  key={item.label}
+                  className="rounded-3xl border border-white/10 bg-white/6 p-5 shadow-[0_24px_60px_rgba(2,6,23,0.26)] backdrop-blur-xl animate-fade-up"
+                  style={{ animationDelay: `${index * 120}ms` }}
+                >
+                  <div className="text-3xl font-semibold tracking-tight text-white">{item.value}</div>
+                  <div className="mt-2 text-sm leading-6 text-slate-400">{item.label}</div>
                 </div>
+              ))}
+            </div>
+
+            <div className="mt-10 grid gap-4 lg:grid-cols-[1.1fr_0.9fr]">
+              <div className="rounded-4xl border border-white/10 bg-[linear-gradient(180deg,rgba(15,23,42,0.88),rgba(15,23,42,0.56))] p-5 shadow-[0_35px_90px_rgba(2,6,23,0.35)] backdrop-blur-xl">
+                <div className="flex items-center justify-between border-b border-white/8 pb-4">
+                  <div>
+                    <p className="text-sm font-semibold text-white">Launch coordination</p>
+                    <p className="mt-1 text-sm text-slate-400">Cross-functional team channel</p>
+                  </div>
+                  <div className="rounded-full border border-emerald-400/25 bg-emerald-400/10 px-3 py-1 text-xs font-medium text-emerald-300">
+                    18 active now
+                  </div>
+                </div>
+
+                <div className="space-y-4 py-5">
+                  {[
+                    { name: "Maya", role: "Product", message: "Design QA is complete. Engineering can lock the launch checklist.", accent: "bg-emerald-400" },
+                    { name: "Jon", role: "Engineering", message: "API latency is below target. Shipping the final release candidate now.", accent: "bg-cyan-400" },
+                    { name: "Nia", role: "Ops", message: "Support macros are ready and rollout monitoring starts at 14:00 UTC.", accent: "bg-violet-400" },
+                  ].map((message) => (
+                    <div key={message.name} className="flex gap-3 rounded-2xl border border-white/6 bg-white/5 p-4">
+                      <div className={`mt-1 h-2.5 w-2.5 shrink-0 rounded-full ${message.accent}`} />
+                      <div>
+                        <div className="flex items-center gap-2 text-sm">
+                          <span className="font-semibold text-white">{message.name}</span>
+                          <span className="text-slate-500">{message.role}</span>
+                        </div>
+                        <p className="mt-2 text-sm leading-6 text-slate-300">{message.message}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                <div className="grid gap-3 rounded-2xl border border-white/8 bg-slate-950/40 p-4 sm:grid-cols-3">
+                  {trustBadges.map((item) => (
+                    <div key={item} className="rounded-2xl border border-white/8 bg-white/3 px-4 py-3 text-center text-xs font-medium tracking-[0.16em] text-slate-300 uppercase">
+                      {item}
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="space-y-4">
+                {highlights.map((item, index) => (
+                  <div
+                    key={item.title}
+                    className="rounded-4xl border border-white/10 bg-white/6 p-5 backdrop-blur-xl animate-fade-up"
+                    style={{ animationDelay: `${140 + index * 100}ms` }}
+                  >
+                    <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-2xl border border-cyan-300/20 bg-cyan-300/8 text-cyan-200">
+                      <Icon path={[
+                        "M4 7h16M4 12h10M4 17h7",
+                        "M3 8l7.2 4.8a3 3 0 003.6 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z",
+                        "M12 11V7m0 8h.01M7 4h10l1 3v4.6a4 4 0 01-4 4H10a4 4 0 01-4-4V7l1-3z",
+                      ][index]} />
+                    </div>
+                    <h2 className="text-lg font-semibold tracking-tight text-white">{item.title}</h2>
+                    <p className="mt-2 text-sm leading-6 text-slate-400">{item.description}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section className="relative flex w-full items-center justify-center px-6 pb-10 sm:px-10 lg:w-135 lg:px-10 lg:pb-0 xl:w-145 xl:px-14">
+          <div className="absolute inset-x-6 top-0 h-px bg-linear-to-r from-transparent via-white/12 to-transparent lg:inset-x-0 lg:left-0 lg:top-8 lg:h-auto lg:w-px lg:bg-linear-to-b" />
+
+          <div className="relative w-full max-w-md animate-fade-up rounded-4xl border border-white/10 bg-[linear-gradient(180deg,rgba(15,23,42,0.88),rgba(15,23,42,0.72))] p-6 shadow-[0_40px_120px_rgba(2,6,23,0.48)] backdrop-blur-2xl sm:p-8">
+            <div className="mb-8 flex items-start justify-between gap-4">
+              <div>
+                <p className="text-sm font-medium text-cyan-200">{isSignUp ? "Set up your workspace" : "Secure sign in"}</p>
+                <h2 className="mt-2 text-3xl font-semibold tracking-tight text-white">
+                  {isSignUp ? "Create your account" : "Welcome back"}
+                </h2>
+                <p className="mt-3 text-sm leading-6 text-slate-400">
+                  {isSignUp ? "Launch team collaboration with a cleaner, more organized workspace." : "Access your team channels, direct messages, and live collaboration history."}
+                </p>
+              </div>
+
+              <div className="hidden rounded-2xl border border-white/10 bg-white/5 px-3 py-2 text-right sm:block">
+                <div className="text-xs uppercase tracking-[0.2em] text-slate-500">Status</div>
+                <div className="mt-1 text-sm font-semibold text-emerald-300">Operational</div>
+              </div>
+            </div>
+
+            <div className="mb-6 grid grid-cols-2 gap-2 rounded-2xl border border-white/8 bg-slate-950/40 p-1.5">
+              {[false, true].map((su) => (
+                <button
+                  key={String(su)}
+                  type="button"
+                  onClick={() => {
+                    setIsSignUp(su);
+                    setError("");
+                  }}
+                  className={`rounded-2xl px-4 py-3 text-sm font-semibold transition-all duration-200 ${
+                    isSignUp === su
+                      ? "bg-white text-slate-950 shadow-[0_12px_30px_rgba(255,255,255,0.16)]"
+                      : "text-slate-400 hover:text-slate-200"
+                  }`}
+                >
+                  {su ? "Create account" : "Sign in"}
+                </button>
+              ))}
+            </div>
+
+            {error && (
+              <div className="mb-5 flex items-start gap-3 rounded-2xl border border-rose-400/20 bg-rose-400/10 p-4 animate-shake">
+                <div className="mt-0.5 text-rose-300">
+                  <Icon path="M12 8v4m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" className="h-5 w-5" />
+                </div>
+                <p className="text-sm leading-6 text-rose-100">{error}</p>
               </div>
             )}
 
-            <div>
-              <label className="block text-xs font-semibold text-gray-400 uppercase tracking-widest mb-2">Email address</label>
-              <div className="relative">
-                <svg className="w-4 h-4 text-gray-600 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                </svg>
-                <input type="email" placeholder="you@company.com" value={email} onChange={(e) => setEmail(e.target.value)} required className={inputClass} />
-              </div>
-            </div>
+            <form onSubmit={isSignUp ? handleSignUp : handleLogin} className="space-y-4">
+              {isSignUp && (
+                <div>
+                  <label className="mb-2 block text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-400">Username</label>
+                  <div className="relative">
+                    <div className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-slate-500">
+                      <Icon path="M16 7a4 4 0 11-8 0 4 4 0 018 0zM5 20a7 7 0 0114 0" className="h-4 w-4" />
+                    </div>
+                    <input
+                      type="text"
+                      placeholder="Enter your full name"
+                      value={username}
+                      onChange={(e) => setUsername(e.target.value)}
+                      required={isSignUp}
+                      className={inputClass}
+                    />
+                  </div>
+                </div>
+              )}
 
-            <div>
-              <div className="flex items-center justify-between mb-2">
-                <label className="block text-xs font-semibold text-gray-400 uppercase tracking-widest">Password</label>
-                {!isSignUp && (
-                  <button type="button" className="text-xs text-blue-400 hover:text-blue-300 transition-colors">
-                    Forgot password?
-                  </button>
-                )}
+              <div>
+                <label className="mb-2 block text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-400">Email address</label>
+                <div className="relative">
+                  <div className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-slate-500">
+                    <Icon path="M3 7l8.28 5.52a1.3 1.3 0 001.44 0L21 7M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" className="h-4 w-4" />
+                  </div>
+                  <input
+                    type="email"
+                    placeholder="you@company.com"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    required
+                    className={inputClass}
+                  />
+                </div>
               </div>
-              <div className="relative">
-                <svg className="w-4 h-4 text-gray-600 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                </svg>
-                <input
-                  type={showPassword ? "text" : "password"}
-                  placeholder="••••••••"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  required
-                  className={`${inputClass} pr-10`}
-                />
+
+              <div>
+                <div className="mb-2 flex items-center justify-between gap-3">
+                  <label className="block text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-400">Password</label>
+                  {!isSignUp && (
+                    <button type="button" className="text-sm font-medium text-cyan-200 transition hover:text-cyan-100">
+                      Forgot password?
+                    </button>
+                  )}
+                </div>
+                <div className="relative">
+                  <div className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-slate-500">
+                    <Icon path="M12 14v2m-6 4h12a2 2 0 002-2v-5a2 2 0 00-2-2H6a2 2 0 00-2 2v5a2 2 0 002 2zm10-9V8a4 4 0 00-8 0v3" className="h-4 w-4" />
+                  </div>
+                  <input
+                    type={showPassword ? "text" : "password"}
+                    placeholder="Enter your password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    required
+                    className={inputClass}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-500 transition hover:text-slate-200"
+                    aria-label={showPassword ? "Hide password" : "Show password"}
+                  >
+                    {showPassword ? (
+                      <Icon
+                        path="M4 4l16 16M10.73 10.73a3 3 0 004.24 4.24M9.88 5.09A10.94 10.94 0 0112 5c4.8 0 8.77 3 10 7a11.8 11.8 0 01-3.04 4.57M6.1 6.11A11.77 11.77 0 002 12c1.23 4 5.2 7 10 7a10.9 10.9 0 005.01-1.2"
+                        className="h-4 w-4"
+                      />
+                    ) : (
+                      <Icon
+                        path="M2 12c1.23-4 5.2-7 10-7s8.77 3 10 7c-1.23 4-5.2 7-10 7S3.23 16 2 12zm10-3a3 3 0 100 6 3 3 0 000-6z"
+                        className="h-4 w-4"
+                      />
+                    )}
+                  </button>
+                </div>
+              </div>
+
+              <button
+                type="submit"
+                disabled={loading}
+                className="mt-2 flex w-full items-center justify-center gap-2 rounded-2xl bg-linear-to-r from-cyan-400 via-sky-500 to-blue-600 px-4 py-3.5 text-sm font-semibold text-slate-950 shadow-[0_24px_55px_rgba(14,165,233,0.35)] transition duration-200 hover:-translate-y-px hover:shadow-[0_28px_60px_rgba(14,165,233,0.42)] disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                {loading ? (
+                  <>
+                    <svg className="h-4 w-4 animate-spin" fill="none" viewBox="0 0 24 24" aria-hidden="true">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.37 0 0 5.37 0 12h4zm2 5.29A7.96 7.96 0 014 12H0c0 3.04 1.13 5.82 3 7.94l3-2.65z" />
+                    </svg>
+                    <span>Processing...</span>
+                  </>
+                ) : (
+                  <>
+                    <span>{isSignUp ? "Create account" : "Continue to workspace"}</span>
+                    <Icon path="M5 12h14m-4-4l4 4-4 4" className="h-4 w-4" />
+                  </>
+                )}
+              </button>
+            </form>
+
+            <div className="mt-6 rounded-2xl border border-white/8 bg-slate-950/35 p-4 text-sm text-slate-400">
+              <div className="flex items-center justify-between gap-3">
+                <span>{isSignUp ? "Already have an account?" : "Need access for your team?"}</span>
                 <button
                   type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-600 hover:text-gray-400 transition-colors"
+                  onClick={() => {
+                    setIsSignUp(!isSignUp);
+                    setError("");
+                  }}
+                  className="font-semibold text-cyan-200 transition hover:text-cyan-100"
                 >
-                  {showPassword ? (
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
-                    </svg>
-                  ) : (
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                    </svg>
-                  )}
+                  {isSignUp ? "Sign in" : "Create one"}
                 </button>
               </div>
             </div>
 
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full py-3 mt-2 rounded-xl bg-gradient-to-r from-blue-600 to-cyan-500 hover:from-blue-500 hover:to-cyan-400 active:from-blue-700 active:to-cyan-600 text-white font-semibold text-sm transition-all duration-200 shadow-lg shadow-blue-600/25 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-            >
-              {loading ? (
-                <>
-                  <svg className="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-                  </svg>
-                  <span>Please wait…</span>
-                </>
-              ) : (
-                <>
-                  <span>{isSignUp ? "Create Account" : "Sign In"}</span>
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
-                  </svg>
-                </>
-              )}
-            </button>
-          </form>
-
-          <p className="mt-6 text-center text-sm text-gray-600">
-            {isSignUp ? "Already have an account?" : "Don't have an account?"}{" "}
-            <button
-              onClick={() => { setIsSignUp(!isSignUp); setError(""); }}
-              className="text-blue-400 hover:text-blue-300 font-semibold transition-colors"
-            >
-              {isSignUp ? "Sign In" : "Sign Up"}
-            </button>
-          </p>
-        </div>
+            <p className="mt-6 text-center text-xs leading-6 text-slate-500">
+              Protected access for authenticated workspaces. Your session remains encrypted in transit.
+            </p>
+          </div>
+        </section>
       </div>
     </div>
   );
