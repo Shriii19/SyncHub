@@ -286,7 +286,7 @@ function Chat() {
                   "Room access by private invite",
                   "Anonymous sender labels",
                 ].map((item) => (
-                  <div key={item} className="rounded-2xl border border-white/10 bg-slate-950/30 px-4 py-3 text-xs uppercase tracking-[0.14em] text-slate-300 hover:bg-cyan-400/10 hover:scale-105 transition-transform duration-200">
+                  <div key={item} className="rounded-[1.5rem] border border-white/10 bg-slate-950/30 px-4 py-3 text-xs uppercase tracking-[0.14em] text-slate-300 hover:bg-cyan-400/10 hover:scale-105 transition-transform duration-200">
                     {item}
                   </div>
                 ))}
@@ -339,7 +339,7 @@ function Chat() {
                 <button
                   key={key}
                   onClick={() => createChatRoom(key)}
-                  className="rounded-3xl border border-white/12 bg-white/6 p-5 text-left transition hover:border-cyan-300/30 hover:bg-white/10 hover:scale-[1.03] hover:shadow-lg duration-200"
+                  className="rounded-[2rem] border border-white/12 bg-white/6 p-5 text-left transition hover:border-cyan-300/30 hover:bg-white/10 hover:scale-[1.03] hover:shadow-lg duration-200"
                 >
                   <div className="mb-4 flex h-10 w-10 items-center justify-center rounded-xl border border-cyan-300/20 bg-cyan-300/10 text-cyan-100">
                     <Icon path={mode.icon} className="h-5 w-5" />
