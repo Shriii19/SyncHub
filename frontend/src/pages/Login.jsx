@@ -261,7 +261,7 @@ function Login() {
                       value={username}
                       onChange={(e) => setUsername(e.target.value)}
                       required={isSignUp}
-                      className={inputClass}
+                      className={inputClass + ' border-2 border-cyan-300/30 bg-cyan-300/5 focus:border-cyan-400/60'}
                     />
                   </div>
                 </div>
@@ -279,7 +279,7 @@ function Login() {
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     required
-                    className={inputClass}
+                    className={inputClass + ' border-2 border-cyan-300/30 bg-cyan-300/5 focus:border-cyan-400/60'}
                   />
                 </div>
               </div>
