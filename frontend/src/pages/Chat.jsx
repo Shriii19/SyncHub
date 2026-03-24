@@ -231,11 +231,15 @@ function Chat() {
   const roomActive = Boolean(roomId && roomMode);
 
   return (
-    <div className="min-h-screen bg-(--page-bg) text-white">
-      <div className="mx-auto flex min-h-screen w-full max-w-6xl flex-col px-5 py-6 sm:px-8 lg:px-10">
-        <header className="mb-6 flex items-center justify-between rounded-3xl border border-white/10 bg-white/5 px-5 py-4 backdrop-blur-xl">
+    <div className="min-h-screen bg-gradient-to-br from-[#0f172a] via-[#1e293b] to-[#0a1020] text-white">
+      {/* Decorative Blobs */}
+      <div className="pointer-events-none absolute -top-32 -left-32 h-96 w-96 rounded-full bg-cyan-400 opacity-20 blur-3xl animate-blob animation-delay-2000" />
+      <div className="pointer-events-none absolute -bottom-32 -right-32 h-96 w-96 rounded-full bg-violet-500 opacity-20 blur-3xl animate-blob animation-delay-4000" />
+
+      <div className="relative mx-auto flex min-h-screen w-full max-w-6xl flex-col px-5 py-6 sm:px-8 lg:px-10">
+        <header className="mb-6 flex items-center justify-between rounded-3xl border border-white/10 bg-white/10 px-5 py-4 backdrop-blur-xl shadow-lg">
           <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-linear-to-br from-cyan-400 to-blue-500 text-lg font-black text-slate-950">
+            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-cyan-400 to-blue-500 text-2xl font-black text-slate-950 shadow-md">
               S
             </div>
             <div>
@@ -248,14 +252,14 @@ function Chat() {
             {roomActive && (
               <button
                 onClick={resetSession}
-                className="rounded-xl border border-white/12 bg-white/6 px-4 py-2 text-sm font-medium text-slate-200 transition hover:bg-white/12"
+                className="rounded-xl border border-white/12 bg-white/10 px-4 py-2 text-sm font-medium text-slate-200 transition hover:bg-white/20 shadow-sm"
               >
                 New chat
               </button>
             )}
             <button
               onClick={handleLogout}
-              className="rounded-xl border border-rose-300/20 bg-rose-300/10 px-4 py-2 text-sm font-medium text-rose-200 transition hover:bg-rose-300/16"
+              className="rounded-xl border border-rose-300/20 bg-rose-300/10 px-4 py-2 text-sm font-medium text-rose-200 transition hover:bg-rose-300/16 shadow-sm"
             >
               Logout
             </button>
@@ -282,7 +286,7 @@ function Chat() {
                   "Room access by private invite",
                   "Anonymous sender labels",
                 ].map((item) => (
-                  <div key={item} className="rounded-2xl border border-white/10 bg-slate-950/30 px-4 py-3 text-xs uppercase tracking-[0.14em] text-slate-300">
+                  <div key={item} className="rounded-2xl border border-white/10 bg-slate-950/30 px-4 py-3 text-xs uppercase tracking-[0.14em] text-slate-300 hover:bg-cyan-400/10 hover:scale-105 transition-transform duration-200">
                     {item}
                   </div>
                 ))}
@@ -335,7 +339,7 @@ function Chat() {
                 <button
                   key={key}
                   onClick={() => createChatRoom(key)}
-                  className="rounded-3xl border border-white/12 bg-white/6 p-5 text-left transition hover:border-cyan-300/30 hover:bg-white/10"
+                  className="rounded-3xl border border-white/12 bg-white/6 p-5 text-left transition hover:border-cyan-300/30 hover:bg-white/10 hover:scale-[1.03] hover:shadow-lg duration-200"
                 >
                   <div className="mb-4 flex h-10 w-10 items-center justify-center rounded-xl border border-cyan-300/20 bg-cyan-300/10 text-cyan-100">
                     <Icon path={mode.icon} className="h-5 w-5" />
