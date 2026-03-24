@@ -339,7 +339,7 @@ function Chat() {
                 <button
                   key={key}
                   onClick={() => createChatRoom(key)}
-                  className="rounded-[2rem] border border-white/12 bg-white/6 p-5 text-left transition hover:border-cyan-300/30 hover:bg-white/10 hover:scale-[1.03] hover:shadow-lg duration-200"
+                  className="rounded-[2rem] border border-white/12 bg-white/6 p-5 text-left transition hover:border-cyan-300/30 hover:bg-white/10 hover:scale-105 hover:shadow-lg duration-200"
                 >
                   <div className="mb-4 flex h-10 w-10 items-center justify-center rounded-xl border border-cyan-300/20 bg-cyan-300/10 text-cyan-100">
                     <Icon path={mode.icon} className="h-5 w-5" />

@@ -125,7 +125,7 @@ function Login() {
               {stats.map((item, index) => (
                 <div
                   key={item.label}
-                  className="rounded-[2rem] border border-white/10 bg-white/10 p-5 shadow-xl backdrop-blur-xl animate-fade-in hover:scale-[1.07] hover:shadow-2xl transition-transform duration-200"
+                  className="rounded-[2rem] border border-white/10 bg-white/10 p-5 shadow-xl backdrop-blur-xl animate-fade-in hover:scale-105 hover:shadow-2xl transition-transform duration-200"
                   style={{ animationDelay: `${index * 120}ms` }}
                 >
                   <div className="text-3xl font-semibold tracking-tight text-white drop-shadow-md">{item.value}</div>
@@ -178,7 +178,7 @@ function Login() {
                 {highlights.map((item, index) => (
                   <div
                     key={item.title}
-                    className="rounded-[2.5rem] border border-white/10 bg-white/10 p-5 backdrop-blur-xl animate-fade-in hover:scale-[1.06] hover:shadow-xl transition-transform duration-200"
+                    className="rounded-[2.5rem] border border-white/10 bg-white/10 p-5 backdrop-blur-xl animate-fade-in hover:scale-105 hover:shadow-xl transition-transform duration-200"
                     style={{ animationDelay: `${140 + index * 100}ms` }}
                   >
                     <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-2xl border border-cyan-300/20 bg-cyan-300/8 text-cyan-200">
