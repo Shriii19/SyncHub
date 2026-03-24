@@ -43,6 +43,12 @@ input,
 textarea,
 select {
   font: inherit;
+  transition: background 0.18s, box-shadow 0.18s, color 0.18s;
+}
+
+button:hover {
+  filter: brightness(1.08);
+  box-shadow: 0 2px 12px 0 rgba(34,211,238,0.08);
 }
 
 #root {
