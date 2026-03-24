@@ -1,18 +1,36 @@
-/* ── Scrollbar ── */
-::-webkit-scrollbar { width: 4px; height: 4px; }
-::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.08); border-radius: 99px; }
-::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.16); }
 
-/* ── Keyframe animations ── */
+/* ── Custom Scrollbar ── */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(255,255,255,0.08);
+  border-radius: 99px;
+  transition: background 0.2s;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255,255,255,0.16);
+}
+
+/* ── Keyframe Animations ── */
 @keyframes blob {
   0%, 100% { transform: translate(0, 0) scale(1); }
   33% { transform: translate(20px, -20px) scale(1.05); }
   66% { transform: translate(-10px, 10px) scale(0.95); }
 }
-.animate-blob { animation: blob 8s infinite ease-in-out; }
-.animation-delay-2000 { animation-delay: 2s; }
-.animation-delay-4000 { animation-delay: 4s; }
+.animate-blob {
+  animation: blob 8s infinite ease-in-out;
+}
+.animation-delay-2000 {
+  animation-delay: 2s;
+}
+.animation-delay-4000 {
+  animation-delay: 4s;
+}
 
 @keyframes shake {
   0%, 100% { transform: translateX(0); }
@@ -21,23 +39,31 @@
   60% { transform: translateX(-4px); }
   80% { transform: translateX(4px); }
 }
-.animate-shake { animation: shake 0.4s ease-in-out; }
+.animate-shake {
+  animation: shake 0.4s ease-in-out;
+}
 
 @keyframes msg-in {
   from { opacity: 0; transform: translateY(6px); }
   to   { opacity: 1; transform: translateY(0); }
 }
-.animate-msg-in { animation: msg-in 0.18s ease-out forwards; }
+.animate-msg-in {
+  animation: msg-in 0.18s ease-out forwards;
+}
 
 @keyframes fade-in {
   from { opacity: 0; }
   to   { opacity: 1; }
 }
-.animate-fade-in { animation: fade-in 0.3s ease-out forwards; }
+.animate-fade-in {
+  animation: fade-in 0.3s ease-out forwards;
+}
 
 @keyframes pulse-ring {
-  0%   { box-shadow: 0 0 0 0 rgba(59,130,246,0.4); }
-  70%  { box-shadow: 0 0 0 8px rgba(59,130,246,0); }
-  100% { box-shadow: 0 0 0 0 rgba(59,130,246,0); }
+  0%   { box-shadow: 0 0 0 0 var(--accent-blue, rgba(59,130,246,0.4)); }
+  70%  { box-shadow: 0 0 0 8px var(--accent-blue, rgba(59,130,246,0)); }
+  100% { box-shadow: 0 0 0 0 var(--accent-blue, rgba(59,130,246,0)); }
 }
-.animate-pulse-ring { animation: pulse-ring 2s ease-out infinite; }
+.animate-pulse-ring {
+  animation: pulse-ring 2s ease-out infinite;
+}
