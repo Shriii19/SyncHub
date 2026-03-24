@@ -311,7 +311,7 @@ function Chat() {
                   placeholder="https://your-app/chat?mode=dm&room=..."
                   value={joinInput}
                   onChange={(e) => setJoinInput(e.target.value)}
-                  className="w-full rounded-2xl border border-white/12 bg-slate-950/45 px-4 py-3 text-sm outline-none transition placeholder:text-slate-500 focus:border-cyan-300/40 focus:ring-4 focus:ring-cyan-400/10"
+                  className="w-full rounded-2xl border border-white/12 bg-slate-950/45 px-4 py-3 text-sm outline-none transition placeholder:text-slate-300 focus:border-cyan-300/40 focus:ring-4 focus:ring-cyan-400/10"
                 />
                 <button
                   onClick={joinByLinkOrCode}
@@ -432,7 +432,7 @@ function Chat() {
                     onKeyDown={handleKeyDown}
                     rows={1}
                     placeholder="Send anonymous message..."
-                    className="max-h-35 min-h-6 flex-1 resize-none bg-transparent text-sm leading-6 text-white outline-none placeholder:text-slate-500"
+                    className="max-h-35 min-h-6 flex-1 resize-none bg-transparent text-sm leading-6 text-white outline-none placeholder:text-slate-300"
                   />
                   <button
                     onClick={sendMessage}

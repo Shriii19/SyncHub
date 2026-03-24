@@ -85,7 +85,7 @@ function Login() {
   };
 
   const inputClass =
-    "w-full rounded-2xl border border-white/10 bg-white/6 px-4 py-3.5 pl-11 pr-11 text-[15px] text-white outline-none transition duration-200 placeholder:text-slate-500 focus:border-cyan-300/50 focus:bg-white/8 focus:ring-4 focus:ring-cyan-400/10";
+    "w-full rounded-2xl border border-white/10 bg-white/6 px-4 py-3.5 pl-11 pr-11 text-[15px] text-white outline-none transition duration-200 placeholder:text-slate-300 focus:border-cyan-300/50 focus:bg-white/8 focus:ring-4 focus:ring-cyan-400/10";
 
   return (
     <div className="relative min-h-screen overflow-hidden bg-gradient-to-br from-[#0f172a] via-[#1e293b] to-[#0a1020] text-white">
