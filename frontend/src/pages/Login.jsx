@@ -88,15 +88,16 @@ function Login() {
     "w-full rounded-2xl border border-white/10 bg-white/6 px-4 py-3.5 pl-11 pr-11 text-[15px] text-white outline-none transition duration-200 placeholder:text-slate-500 focus:border-cyan-300/50 focus:bg-white/8 focus:ring-4 focus:ring-cyan-400/10";
 
   return (
-    <div className="relative min-h-screen overflow-hidden bg-(--page-bg) text-white">
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(45,212,191,0.12),transparent_28%),radial-gradient(circle_at_75%_20%,rgba(14,165,233,0.12),transparent_24%),radial-gradient(circle_at_bottom_right,rgba(99,102,241,0.14),transparent_30%)]" />
-      <div className="pointer-events-none absolute inset-0 auth-grid opacity-40" />
+    <div className="relative min-h-screen overflow-hidden bg-gradient-to-br from-[#0f172a] via-[#1e293b] to-[#0a1020] text-white">
+      {/* Decorative Blobs */}
+      <div className="pointer-events-none absolute -top-32 -left-32 h-96 w-96 rounded-full bg-cyan-400 opacity-20 blur-3xl animate-blob animation-delay-2000" />
+      <div className="pointer-events-none absolute -bottom-32 -right-32 h-96 w-96 rounded-full bg-violet-500 opacity-20 blur-3xl animate-blob animation-delay-4000" />
 
-      <div className="relative mx-auto flex min-h-screen max-w-360 flex-col lg:flex-row">
+      <div className="relative mx-auto flex min-h-screen max-w-6xl flex-col lg:flex-row">
         <section className="flex flex-1 items-center px-6 py-10 sm:px-10 lg:px-16 lg:py-14 xl:px-20">
-          <div className="w-full max-w-2xl animate-fade-up">
+          <div className="w-full max-w-2xl animate-fade-in">
             <div className="mb-8 flex items-center gap-3">
-              <div className="flex h-11 w-11 items-center justify-center rounded-2xl border border-white/12 bg-linear-to-br from-cyan-400 to-blue-500 text-lg font-black text-slate-950 shadow-[0_18px_45px_rgba(14,165,233,0.25)]">
+              <div className="flex h-12 w-12 items-center justify-center rounded-2xl border border-white/15 bg-gradient-to-br from-cyan-400 to-blue-500 text-2xl font-black text-slate-950 shadow-lg">
                 S
               </div>
               <div>
@@ -106,12 +107,12 @@ function Login() {
             </div>
 
             <div className="max-w-xl">
-              <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-cyan-300/20 bg-cyan-300/8 px-3 py-1 text-xs font-semibold uppercase tracking-[0.24em] text-cyan-200">
+              <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-cyan-300/20 bg-cyan-300/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.24em] text-cyan-200 shadow-sm">
                 <span className="h-2 w-2 rounded-full bg-cyan-300" />
                 Invite-only secret chat
               </div>
 
-              <h1 className="max-w-2xl text-4xl font-semibold leading-[1.02] tracking-[-0.04em] text-white sm:text-5xl lg:text-6xl">
+              <h1 className="max-w-2xl text-4xl font-bold leading-[1.02] tracking-[-0.04em] text-white sm:text-5xl lg:text-6xl drop-shadow-lg">
                 A private chat product designed for anonymous 1-to-1 and group rooms.
               </h1>
 
@@ -124,18 +125,18 @@ function Login() {
               {stats.map((item, index) => (
                 <div
                   key={item.label}
-                  className="rounded-3xl border border-white/10 bg-white/6 p-5 shadow-[0_24px_60px_rgba(2,6,23,0.26)] backdrop-blur-xl animate-fade-up"
+                  className="rounded-3xl border border-white/10 bg-white/10 p-5 shadow-xl backdrop-blur-xl animate-fade-in hover:scale-[1.07] hover:shadow-2xl transition-transform duration-200"
                   style={{ animationDelay: `${index * 120}ms` }}
                 >
-                  <div className="text-3xl font-semibold tracking-tight text-white">{item.value}</div>
+                  <div className="text-3xl font-semibold tracking-tight text-white drop-shadow-md">{item.value}</div>
                   <div className="mt-2 text-sm leading-6 text-slate-400">{item.label}</div>
                 </div>
               ))}
             </div>
 
             <div className="mt-10 grid gap-4 lg:grid-cols-[1.1fr_0.9fr]">
-              <div className="rounded-4xl border border-white/10 bg-[linear-gradient(180deg,rgba(15,23,42,0.88),rgba(15,23,42,0.56))] p-5 shadow-[0_35px_90px_rgba(2,6,23,0.35)] backdrop-blur-xl">
-                <div className="flex items-center justify-between border-b border-white/8 pb-4">
+              <div className="rounded-4xl border border-white/10 bg-gradient-to-b from-slate-900/90 to-slate-900/60 p-5 shadow-2xl backdrop-blur-xl">
+                <div className="flex items-center justify-between border-b border-white/10 pb-4">
                   <div>
                     <p className="text-sm font-semibold text-white">Private room preview</p>
                     <p className="mt-1 text-sm text-slate-400">Anonymous messages inside invite-only room</p>
@@ -151,7 +152,7 @@ function Login() {
                     { name: "User B", role: "Anonymous", message: "Joined. No profile names are visible here, which is perfect.", accent: "bg-cyan-400" },
                     { name: "User C", role: "Anonymous", message: "Group mode also works with the same private-link concept.", accent: "bg-violet-400" },
                   ].map((message) => (
-                    <div key={message.name} className="flex gap-3 rounded-2xl border border-white/6 bg-white/5 p-4">
+                    <div key={message.name} className="flex gap-3 rounded-2xl border border-white/10 bg-white/10 p-4 shadow-sm">
                       <div className={`mt-1 h-2.5 w-2.5 shrink-0 rounded-full ${message.accent}`} />
                       <div>
                         <div className="flex items-center gap-2 text-sm">
@@ -164,9 +165,9 @@ function Login() {
                   ))}
                 </div>
 
-                <div className="grid gap-3 rounded-2xl border border-white/8 bg-slate-950/40 p-4 sm:grid-cols-3">
+                <div className="grid gap-3 rounded-2xl border border-white/10 bg-slate-950/40 p-4 sm:grid-cols-3">
                   {trustBadges.map((item) => (
-                    <div key={item} className="rounded-2xl border border-white/8 bg-white/3 px-4 py-3 text-center text-xs font-medium tracking-[0.16em] text-slate-300 uppercase">
+                    <div key={item} className="rounded-2xl border border-white/10 bg-white/10 px-4 py-3 text-center text-xs font-medium tracking-[0.16em] text-slate-300 uppercase">
                       {item}
                     </div>
                   ))}
@@ -177,7 +178,7 @@ function Login() {
                 {highlights.map((item, index) => (
                   <div
                     key={item.title}
-                    className="rounded-4xl border border-white/10 bg-white/6 p-5 backdrop-blur-xl animate-fade-up"
+                    className="rounded-4xl border border-white/10 bg-white/10 p-5 backdrop-blur-xl animate-fade-in hover:scale-[1.06] hover:shadow-xl transition-transform duration-200"
                     style={{ animationDelay: `${140 + index * 100}ms` }}
                   >
                     <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-2xl border border-cyan-300/20 bg-cyan-300/8 text-cyan-200">
