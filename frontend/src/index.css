@@ -54,6 +54,8 @@ button:hover {
 #root {
   min-height: 100vh;
   box-shadow: 0 4px 32px 0 rgba(0,0,0,0.10);
+  border: 1.5px solid rgba(255,255,255,0.06);
+  border-radius: 2.5rem;
 }
 
 .scrollbar-thin::-webkit-scrollbar,
