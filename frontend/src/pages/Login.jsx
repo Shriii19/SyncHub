@@ -127,6 +127,7 @@ function Login() {
               ))}
             </div>
 
+            {/* Private room preview section */}
             <div className="mt-10 grid gap-4 lg:grid-cols-[1.1fr_0.9fr]">
               <div className="rounded-4xl border border-white/10 bg-gradient-to-b from-slate-900/90 to-slate-900/60 p-5 shadow-2xl backdrop-blur-xl">
                 <div className="flex items-center justify-between border-b border-white/10 pb-4">
