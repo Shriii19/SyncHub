@@ -25,7 +25,6 @@ const stats = [
   { value: "1", label: "invite link per room" },
 ];
 
-const trustBadges = ["No public directory", "Invite-only rooms", "Anonymous sender IDs"];
 
 function Icon({ path, className = "w-5 h-5" }) {
   return (
