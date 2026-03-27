@@ -1,4 +1,5 @@
 import { useState } from "react";
+import Icon from "../components/Icon";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 
@@ -26,13 +27,6 @@ const stats = [
 ];
 
 
-function Icon({ path, className = "w-5 h-5" }) {
-  return (
-    <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d={path} />
-    </svg>
-  );
-}
 
 function Login() {
   const [email, setEmail] = useState("");
