@@ -4,6 +4,7 @@ import Login from "./pages/Login";
 import Chat from "./pages/Chat";
 import { CssBaseline, ThemeProvider, createTheme } from "@mui/material";
 
+// TODO: Extract theme to a separate file for maintainability
 const theme = createTheme({
   palette: {
     mode: "dark",
