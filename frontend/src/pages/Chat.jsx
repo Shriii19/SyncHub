@@ -120,6 +120,7 @@ function Chat() {
   }, [messages]);
 
   const handleLogout = () => {
+    // Remove authentication and user info on logout
     localStorage.removeItem("token");
     localStorage.removeItem("userEmail");
     navigate("/");
