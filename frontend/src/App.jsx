@@ -41,9 +41,8 @@ function App() {
         height: '340px',
         zIndex: 0,
         pointerEvents: 'none',
-        filter: 'blur(8px) opacity(0.7)',
       }}>
-        <div className="animate-blob" style={{
+        <div className="animate-blob blob-pulse" style={{
           width: '100%',
           height: '100%',
           borderRadius: '50%',
