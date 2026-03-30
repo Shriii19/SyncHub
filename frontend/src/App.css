@@ -1,3 +1,14 @@
+/* --- UI Enhancement: Button Hover/Focus Effects --- */
+button, .btn {
+  transition: background 0.18s, color 0.18s, box-shadow 0.18s, border 0.18s;
+}
+button:hover, .btn:hover, button:focus, .btn:focus {
+  background: linear-gradient(90deg, #22d3ee 0%, #6366f1 100%);
+  color: #0f172a;
+  box-shadow: 0 2px 16px 0 rgba(34,211,238,0.18);
+  outline: none;
+  border-color: #22d3ee;
+}
 
 /* ── Custom Scrollbar ── */
 ::-webkit-scrollbar {
