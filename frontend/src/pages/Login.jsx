@@ -263,9 +263,9 @@ function Login() {
               )}
 
               <div>
-                <label className="mb-2 block text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-400">Email address</label>
+                <label className="mb-2 block text-[12px] font-bold uppercase tracking-[0.22em] text-cyan-200 drop-shadow">Email address</label>
                 <div className="relative">
-                  <div className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-slate-500">
+                  <div className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-cyan-300">
                     <Icon path="M3 7l8.28 5.52a1.3 1.3 0 001.44 0L21 7M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" className="h-4 w-4" />
                   </div>
                   <input
@@ -274,7 +274,7 @@ function Login() {
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     required
-                    className={inputClass + ' border-2 border-cyan-300/30 bg-cyan-300/5 focus:border-cyan-400/60'}
+                    className={inputClass + ' border-2 border-cyan-400/60 bg-cyan-300/10 focus:border-cyan-400/80 focus:bg-cyan-300/20'}
                     aria-label="Email address"
                   />
                 </div>
