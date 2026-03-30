@@ -256,6 +256,7 @@ function Login() {
                       onChange={(e) => setUsername(e.target.value)}
                       required={isSignUp}
                       className={inputClass + ' border-2 border-cyan-300/30 bg-cyan-300/5 focus:border-cyan-400/60'}
+                      aria-label="Full name"
                     />
                   </div>
                 </div>
@@ -274,6 +275,7 @@ function Login() {
                     onChange={(e) => setEmail(e.target.value)}
                     required
                     className={inputClass + ' border-2 border-cyan-300/30 bg-cyan-300/5 focus:border-cyan-400/60'}
+                    aria-label="Email address"
                   />
                 </div>
               </div>
@@ -298,6 +300,7 @@ function Login() {
                     onChange={(e) => setPassword(e.target.value)}
                     required
                     className={inputClass}
+                    aria-label="Password"
                   />
                   <button
                     type="button"
